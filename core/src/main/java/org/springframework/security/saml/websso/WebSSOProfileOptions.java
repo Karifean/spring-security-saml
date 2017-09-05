@@ -14,7 +14,7 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.saml2.core.AuthnContextComparisonTypeEnumeration;
+import org.opensaml.saml.saml2.core.AuthnContextComparisonTypeEnumeration;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -59,9 +59,9 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
      * Sets binding to be used for for sending SAML message to IDP.
      *
      * @param binding binding value
-     * @see org.opensaml.common.xml.SAMLConstants#SAML2_POST_BINDING_URI
-     * @see org.opensaml.common.xml.SAMLConstants#SAML2_REDIRECT_BINDING_URI
-     * @see org.opensaml.common.xml.SAMLConstants#SAML2_PAOS_BINDING_URI
+     * @see org.opensaml.saml.common.xml.SAMLConstants#SAML2_POST_BINDING_URI
+     * @see org.opensaml.saml.common.xml.SAMLConstants#SAML2_REDIRECT_BINDING_URI
+     * @see org.opensaml.saml.common.xml.SAMLConstants#SAML2_PAOS_BINDING_URI
      * @see org.springframework.security.saml.SAMLConstants#SAML2_HOK_WEBSSO_PROFILE_URI
      */
     public void setBinding(String binding) {
@@ -163,12 +163,12 @@ public class WebSSOProfileOptions implements Serializable, Cloneable {
     /**
      * When set determines which NameIDPolicy will be requested as part of the AuthnRequest sent to the IDP.
      *
-     * @see org.opensaml.saml2.core.NameIDType#EMAIL
-     * @see org.opensaml.saml2.core.NameIDType#TRANSIENT
-     * @see org.opensaml.saml2.core.NameIDType#PERSISTENT
-     * @see org.opensaml.saml2.core.NameIDType#X509_SUBJECT
-     * @see org.opensaml.saml2.core.NameIDType#KERBEROS
-     * @see org.opensaml.saml2.core.NameIDType#UNSPECIFIED
+     * @see org.opensaml.saml.saml2.core.NameIDType#EMAIL
+     * @see org.opensaml.saml.saml2.core.NameIDType#TRANSIENT
+     * @see org.opensaml.saml.saml2.core.NameIDType#PERSISTENT
+     * @see org.opensaml.saml.saml2.core.NameIDType#X509_SUBJECT
+     * @see org.opensaml.saml.saml2.core.NameIDType#KERBEROS
+     * @see org.opensaml.saml.saml2.core.NameIDType#UNSPECIFIED
      *
      * @param nameID name ID
      */

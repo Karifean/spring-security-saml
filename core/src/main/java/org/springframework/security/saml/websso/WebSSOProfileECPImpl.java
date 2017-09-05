@@ -15,19 +15,20 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.ecp.Request;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.SingleSignOnService;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.soap.common.SOAPObjectBuilder;
-import org.opensaml.ws.soap.soap11.Envelope;
-import org.opensaml.ws.soap.util.SOAPHelper;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.ecp.Request;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.SingleSignOnService;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.soap.common.SOAPObjectBuilder;
+import org.opensaml.soap.soap11.Envelope;
+//import org.opensaml.ws.soap.util.SOAPHelper;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
@@ -49,7 +50,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
     @Override
     public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options)
-            throws SAMLException, MetadataProviderException, MessageEncodingException {
+            throws SAMLException, ResolverException, MessageEncodingException {
 
         SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         AssertionConsumerService assertionConsumer = getAssertionConsumerService(options, null, spDescriptor);

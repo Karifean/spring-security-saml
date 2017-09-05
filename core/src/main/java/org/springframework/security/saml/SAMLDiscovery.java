@@ -14,14 +14,15 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.samlext.idpdisco.DiscoveryResponse;
-import org.opensaml.util.URLBuilder;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.Pair;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
+//import org.opensaml.saml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml.ext.idpdisco.DiscoveryResponse;
+import net.shibboleth.utilities.java.support.net.URLBuilder;
+import org.opensaml.core.xml.XMLObject;
+import net.shibboleth.utilities.java.support.collection.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -182,7 +184,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             request.setAttribute(SAMLConstants.LOCAL_ENTITY_ID, entityId);
             messageContext = contextProvider.getLocalEntity(request, response);
 
-        } catch (MetadataProviderException e) {
+        } catch (ResolverException e) {
             logger.debug("Error loading metadata", e);
             throw new ServletException(new SAMLException("Error loading metadata", e));
         }
@@ -310,7 +312,7 @@ public class SAMLDiscovery extends GenericFilterBean {
             List<XMLObject> discoveryResponseElements = descriptor.getExtensions().getUnknownXMLObjects(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
             for (XMLObject element : discoveryResponseElements) {
                 DiscoveryResponse response = (DiscoveryResponse) element;
-                if (response.getBinding().equals(DiscoveryResponse.IDP_DISCO_NS)) {
+                if (response.getBinding().equals(org.opensaml.saml.common.xml.SAMLConstants.SAML_IDP_DISCO_NS)) {
                     logger.debug("Using IDP Discovery response URL from metadata {}", response.getLocation());
                     return response.getLocation();
                 }
@@ -347,8 +349,14 @@ public class SAMLDiscovery extends GenericFilterBean {
      */
     protected boolean isResponseURLValid(String returnURL, SAMLMessageContext messageContext) {
 
-        URLBuilder foundURL = new URLBuilder(returnURL);
-        URLBuilder defaultURL = new URLBuilder(getDefaultReturnURL(messageContext));
+        URLBuilder foundURL = null;
+        URLBuilder defaultURL = null;
+        try {
+            foundURL = new URLBuilder(returnURL);
+            defaultURL = new URLBuilder(getDefaultReturnURL(messageContext));
+        } catch (MalformedURLException e) {
+            return false;
+        }
 
         if (!defaultURL.getHost().equals(foundURL.getHost())) {
             return false;
@@ -365,11 +373,7 @@ public class SAMLDiscovery extends GenericFilterBean {
      * @return IDP configured as default or null when no such exists
      */
     protected String getPassiveIDP(HttpServletRequest request) {
-        try {
-            return metadata.getDefaultIDP();
-        } catch (MetadataProviderException e) {
-            return null;
-        }
+        return metadata.getDefaultIDP();
     }
 
     /**

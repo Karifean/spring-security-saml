@@ -14,7 +14,9 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 
 /**
  * Provider capable of supplying metadata extensions including information about requirements of the given entity.
@@ -28,8 +30,7 @@ public interface ExtendedMetadataProvider {
      *
      * @param entityID entity to load metadata for
      * @return null if not found, metadata otherwise
-     * @throws MetadataProviderException in case an error occurs
+     * @throws ResolverException in case an error occurs
      */
-    ExtendedMetadata getExtendedMetadata(String entityID) throws MetadataProviderException;
-
+    ExtendedMetadata getExtendedMetadata(String entityID) throws ResolverException /* throws MetadataProviderException */ ;
 }

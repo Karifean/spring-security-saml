@@ -1,7 +1,7 @@
 package org.springframework.security.saml.trust.httpclient;
 
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+//import org.apache.commons.httpclient.protocol.Protocol;
+//import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.saml.key.KeyManager;

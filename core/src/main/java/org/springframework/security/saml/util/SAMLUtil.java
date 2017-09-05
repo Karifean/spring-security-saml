@@ -15,28 +15,36 @@
  */
 package org.springframework.security.saml.util;
 
+import net.shibboleth.utilities.java.support.net.URIException;
+import net.shibboleth.utilities.java.support.primitive.StringSupport;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import org.joda.time.DateTime;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.binding.decoding.BasicURLComparator;
-import org.opensaml.common.binding.decoding.URIComparator;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.*;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import net.shibboleth.utilities.java.support.net.BasicURLComparator;
+import net.shibboleth.utilities.java.support.net.URIComparator;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.saml.saml2.metadata.*;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallingException;
+//import org.opensaml.xml.Configuration;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.signature.*;
-import org.opensaml.xml.util.DatatypeHelper;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.security.credential.Credential;
+//import org.opensaml.signature.*;
+//import org.opensaml.xml.util.DatatypeHelper;
+import org.opensaml.xmlsec.signature.*;
+import org.opensaml.xmlsec.signature.support.SignatureException;
+import org.opensaml.xmlsec.signature.support.Signer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
@@ -96,9 +104,9 @@ public class SAMLUtil {
      * @param descriptor IDP to search for service in
      * @param binding    binding supported by the service
      * @return SSO service capable of handling the given binding
-     * @throws MetadataProviderException if the service can't be determined
+     * @throws ResolverException if the service can't be determined
      */
-    public static SingleLogoutService getLogoutServiceForBinding(SSODescriptor descriptor, String binding) throws MetadataProviderException {
+    public static SingleLogoutService getLogoutServiceForBinding(SSODescriptor descriptor, String binding) throws ResolverException {
         List<SingleLogoutService> services = descriptor.getSingleLogoutServices();
         for (SingleLogoutService service : services) {
             if (binding.equals(service.getBinding())) {
@@ -106,14 +114,14 @@ public class SAMLUtil {
             }
         }
         logger.debug("No binding found for IDP with binding " + binding);
-        throw new MetadataProviderException("Binding " + binding + " is not supported for this IDP");
+        throw new ResolverException("Binding " + binding + " is not supported for this IDP");
     }
 
-    public static String getLogoutBinding(IDPSSODescriptor idp, SPSSODescriptor sp) throws MetadataProviderException {
+    public static String getLogoutBinding(IDPSSODescriptor idp, SPSSODescriptor sp) throws ResolverException {
 
         List<SingleLogoutService> logoutServices = idp.getSingleLogoutServices();
         if (logoutServices.size() == 0) {
-            throw new MetadataProviderException("IDP doesn't contain any SingleLogout endpoints");
+            throw new ResolverException("IDP doesn't contain any SingleLogout endpoints");
         }
 
         String binding = null;
@@ -156,7 +164,7 @@ public class SAMLUtil {
      * @param ssoDescriptor descriptor
      * @param index         to load, can be null
      * @return consumer service
-     * @throws org.opensaml.common.SAMLRuntimeException
+     * @throws org.opensaml.saml.common.SAMLRuntimeException
      *          in case assertionConsumerService with given index isn't found
      */
     public static AssertionConsumerService getConsumerService(SPSSODescriptor ssoDescriptor, Integer index) {
@@ -215,9 +223,9 @@ public class SAMLUtil {
      * @param hashID   hash id to compare
      * @param entityId entity id to hash and verify
      * @return true if values match
-     * @throws MetadataProviderException in case SHA-1 hash can't be initialized
+     * @throws ResolverException in case SHA-1 hash can't be initialized
      */
-    public static boolean compare(byte[] hashID, String entityId) throws MetadataProviderException {
+    public static boolean compare(byte[] hashID, String entityId) throws ResolverException {
 
         try {
 
@@ -233,7 +241,7 @@ public class SAMLUtil {
             return true;
 
         } catch (NoSuchAlgorithmException e) {
-            throw new MetadataProviderException("SHA-1 message digest not available", e);
+            throw new ResolverException("SHA-1 message digest not available", e);
         }
 
     }
@@ -243,16 +251,16 @@ public class SAMLUtil {
      *
      * @param alias alias to verify
      * @param entityId id of the entity
-     * @throws MetadataProviderException in case any validation problem is found
+     * @throws ResolverException in case any validation problem is found
      */
-    public static void verifyAlias(String alias, String entityId) throws MetadataProviderException {
+    public static void verifyAlias(String alias, String entityId) throws ResolverException {
 
         if (alias == null) {
-            throw new MetadataProviderException("Alias for entity " + entityId + " is null");
+            throw new ResolverException("Alias for entity " + entityId + " is null");
         } else if (alias.length() == 0) {
-            throw new MetadataProviderException("Alias for entity " + entityId + " is empty");
+            throw new ResolverException("Alias for entity " + entityId + " is empty");
         } else if (!alias.matches("\\p{ASCII}*")) {
-            throw new MetadataProviderException("Only ASCII characters can be used in the alias " + alias + " for entity " + entityId);
+            throw new ResolverException("Only ASCII characters can be used in the alias " + alias + " for entity " + entityId);
         }
 
     }
@@ -297,7 +305,7 @@ public class SAMLUtil {
             return certList;
         }
 
-        for (org.opensaml.xml.signature.X509Certificate xmlCert : x509Data.getX509Certificates()) {
+        for (X509Certificate xmlCert : x509Data.getX509Certificates()) {
             if (xmlCert != null && xmlCert.getValue() != null) {
                 certList.add(xmlCert.getValue());
             }
@@ -321,8 +329,8 @@ public class SAMLUtil {
         String paosHeader = request.getHeader(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_HEADER);
         return acceptHeader != null && paosHeader != null
                 && acceptHeader.contains(org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER)
-                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.PAOS_NS)
-                && paosHeader.contains(org.opensaml.common.xml.SAMLConstants.SAML20ECP_NS);
+                && paosHeader.contains(org.opensaml.saml.common.xml.SAMLConstants.PAOS_NS)
+                && paosHeader.contains(org.opensaml.saml.common.xml.SAMLConstants.SAML20ECP_NS);
 
     }
 
@@ -338,9 +346,9 @@ public class SAMLUtil {
      * @return first endpoint satisfying the requestURL and binding conditions
      * @throws SAMLException in case endpoint can't be found
      */
-    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport) throws SAMLException {
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport) throws SAMLException, URIException {
         HttpServletRequest httpRequest = ((HttpServletRequestAdapter)inTransport).getWrappedRequest();
-        String requestURL = DatatypeHelper.safeTrimOrNullString(httpRequest.getRequestURL().toString());
+        String requestURL = StringSupport.trimOrNull(httpRequest.getRequestURL().toString());
         for (T endpoint : endpoints) {
             String binding = getBindingForEndpoint(endpoint);
             // Check that destination and binding matches
@@ -362,16 +370,16 @@ public class SAMLUtil {
      * @param metadata metadata manager
      * @param idpId entity ID
      * @return descriptor
-     * @throws MetadataProviderException in case descriptor can't be found
+     * @throws ResolverException in case descriptor can't be found
      */
-    public static IDPSSODescriptor getIDPDescriptor(MetadataManager metadata, String idpId) throws MetadataProviderException {
+    public static IDPSSODescriptor getIDPDescriptor(MetadataManager metadata, String idpId) throws ResolverException {
         if (!metadata.isIDPValid(idpId)) {
             logger.debug("IDP name of the authenticated user is not valid", idpId);
-            throw new MetadataProviderException("IDP with name " + idpId + " wasn't found in the list of configured IDPs");
+            throw new ResolverException("IDP with name " + idpId + " wasn't found in the list of configured IDPs");
         }
         IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) metadata.getRole(idpId, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
         if (idpssoDescriptor == null) {
-            throw new MetadataProviderException("Given IDP " + idpId + " doesn't contain any IDPSSODescriptor element");
+            throw new ResolverException("Given IDP " + idpId + " doesn't contain any IDPSSODescriptor element");
         }
         return idpssoDescriptor;
     }
@@ -381,7 +389,7 @@ public class SAMLUtil {
      *
      * @param message message the marshall and serialize
      * @return marshaled message
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws org.opensaml.messaging.encoder.MessageEncodingException
      *          thrown if the give message can not be marshaled into its DOM representation
      */
     public static Element marshallMessage(XMLObject message) throws MessageEncodingException {
@@ -390,14 +398,14 @@ public class SAMLUtil {
                 logger.debug("XMLObject already had cached DOM, returning that element");
                 return message.getDOM();
             }
-            Marshaller marshaller = Configuration.getMarshallerFactory().getMarshaller(message);
+            Marshaller marshaller = XMLObjectProviderRegistrySupport.getMarshallerFactory().getMarshaller(message);
             if (marshaller == null) {
                 throw new MessageEncodingException("Unable to marshall message, no marshaller registered for message object: "
                                                    + message.getElementQName());
             }
             Element messageElem = marshaller.marshall(message);
             if (logger.isTraceEnabled()) {
-                logger.trace("Marshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
+                logger.trace("Marshalled message into DOM:\n{}", SerializeSupport.nodeToString(messageElem));
             }
             return messageElem;
         } catch (MarshallingException e) {
@@ -415,7 +423,7 @@ public class SAMLUtil {
      * @param signingCredential credential to sign with
      * @param signingAlgorithm  signing algorithm to use (optional). Leave null to use credential's default algorithm
      * @param keyInfoGenerator name of generator used to create KeyInfo elements with key data
-     * @throws org.opensaml.ws.message.encoder.MessageEncodingException
+     * @throws org.opensaml.messaging.encoder.MessageEncodingException
      *          thrown if there is a problem marshalling or signing the message
      * @return marshalled and signed message
      */
@@ -424,7 +432,7 @@ public class SAMLUtil {
 
         if (signingCredential != null && !signableMessage.isSigned()) {
 
-            XMLObjectBuilder<Signature> signatureBuilder = org.opensaml.Configuration.getBuilderFactory().getBuilder(
+            XMLObjectBuilder<Signature> signatureBuilder = XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(
                     Signature.DEFAULT_ELEMENT_NAME);
             Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
 
@@ -436,7 +444,7 @@ public class SAMLUtil {
 
             try {
                 SecurityHelper.prepareSignatureParams(signature, signingCredential, null, keyInfoGenerator);
-            } catch (org.opensaml.xml.security.SecurityException e) {
+            } catch (org.opensaml.security.SecurityException e) {
                 throw new MessageEncodingException("Error preparing signature for signing", e);
             }
 
@@ -547,7 +555,7 @@ public class SAMLUtil {
         if (extendedMetadata == null) {
             try {
                 extendedMetadata = metadataManager.getExtendedMetadata(descriptor.getEntityID());
-            } catch (MetadataProviderException e) {
+            } catch (ResolverException e) {
                 logger.error("Unable to locate extended metadata", e);
                 throw new MarshallingException("Unable to locate extended metadata", e);
             }
@@ -567,7 +575,7 @@ public class SAMLUtil {
             throw new MarshallingException("Unable to marshall message", e);
         }
 
-        return XMLHelper.nodeToString(element);
+        return SerializeSupport.nodeToString(element);
 
     }
 

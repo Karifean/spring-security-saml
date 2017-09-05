@@ -14,9 +14,11 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
+import net.shibboleth.utilities.java.support.net.URIException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.security.SecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,15 +91,18 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
         } catch (SAMLException e) {
             logger.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
-        } catch (MetadataProviderException e) {
+        } catch (ResolverException e) {
             logger.debug("Error determining metadata contracts", e);
             throw new AuthenticationServiceException("Error determining metadata contracts", e);
         } catch (MessageDecodingException e) {
             logger.debug("Error decoding incoming SAML message", e);
             throw new AuthenticationServiceException("Error decoding incoming SAML message", e);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (SecurityException e) {
             logger.debug("Incoming SAML message is invalid", e);
             throw new AuthenticationServiceException("Incoming SAML message is invalid", e);
+        } catch (URIException e) {
+            logger.debug("Incoming SAML message has invalid URI", e);
+            throw new AuthenticationServiceException("Incoming SAML message has invalid URI", e);
         }
 
     }

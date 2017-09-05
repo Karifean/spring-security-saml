@@ -14,7 +14,7 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 
 import javax.xml.namespace.QName;
 

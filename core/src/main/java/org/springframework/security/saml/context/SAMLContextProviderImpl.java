@@ -15,32 +15,36 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCredentialResolver;
-import org.opensaml.ws.security.ServletRequestX509CredentialAdapter;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.saml.saml2.metadata.RoleDescriptor;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.saml.security.impl.MetadataCredentialResolver;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.security.trust.impl.ExplicitX509CertificateTrustEngine;
+import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
+import org.opensaml.security.x509.impl.PKIXX509CredentialTrustEngine;
+import org.opensaml.security.messaging.ServletRequestX509CredentialAdapter;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
-import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
-import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
-import org.opensaml.xml.security.trust.ExplicitX509CertificateTrustEngine;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.*;
-import org.opensaml.xml.signature.SignatureTrustEngine;
-import org.opensaml.xml.signature.impl.ExplicitKeySignatureTrustEngine;
-import org.opensaml.xml.signature.impl.PKIXSignatureTrustEngine;
+//import org.opensaml.xml.Configuration;
+import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.xmlsec.keyinfo.KeyInfoCredentialResolver;
+import org.opensaml.xmlsec.keyinfo.impl.StaticKeyInfoCredentialResolver;
+import org.opensaml.security.trust.impl.ExplicitX509CertificateTrustEngine;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.*;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
+import org.opensaml.xmlsec.signature.support.impl.ExplicitKeySignatureTrustEngine;
+import org.opensaml.xmlsec.signature.support.impl.PKIXSignatureTrustEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -75,13 +79,12 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected final static Logger logger = LoggerFactory.getLogger(SAMLContextProviderImpl.class);
 
     // Way to obtain encrypted key info from XML Encryption
-    private static ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver();
-
-    static {
-        encryptedKeyResolver.getResolverChain().add(new InlineEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new EncryptedElementTypeEncryptedKeyResolver());
-        encryptedKeyResolver.getResolverChain().add(new SimpleRetrievalMethodEncryptedKeyResolver());
-    }
+    private static ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver(
+            Arrays.asList(
+                    new InlineEncryptedKeyResolver(),
+                    new EncryptedElementTypeEncryptedKeyResolver(),
+                    new SimpleRetrievalMethodEncryptedKeyResolver())
+    );
 
     protected KeyManager keyManager;
     protected MetadataManager metadata;
@@ -97,9 +100,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param request  request
      * @param response response
      * @return context
-     * @throws MetadataProviderException in case of metadata problems
+     * @throws ResolverException in case of metadata problems
      */
-    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
+    public SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws ResolverException {
 
         SAMLMessageContext context = new SAMLMessageContext();
         populateGenericContext(request, response, context);
@@ -116,9 +119,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * @param request  request
      * @param response response
      * @return context
-     * @throws MetadataProviderException in case of metadata problems
+     * @throws ResolverException in case of metadata problems
      */
-    public SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException {
+    public SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws ResolverException {
 
         SAMLMessageContext context = new SAMLMessageContext();
         populateGenericContext(request, response, context);
@@ -138,9 +141,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * If request parameter is null the default IDP is returned.
      *
      * @param context context to populate ID for
-     * @throws MetadataProviderException in case provided IDP value is invalid
+     * @throws ResolverException in case provided IDP value is invalid
      */
-    protected void populatePeerEntityId(SAMLMessageContext context) throws MetadataProviderException {
+    protected void populatePeerEntityId(SAMLMessageContext context) throws ResolverException {
 
         HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
         String entityId;
@@ -169,15 +172,15 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * Populates additional information about the peer based on the previously loaded peerEntityId.
      *
      * @param samlContext to populate
-     * @throws MetadataProviderException in case metadata problem is encountered
+     * @throws ResolverException in case metadata problem is encountered
      */
-    protected void populatePeerContext(SAMLMessageContext samlContext) throws MetadataProviderException {
+    protected void populatePeerContext(SAMLMessageContext samlContext) throws ResolverException {
 
         String peerEntityId = samlContext.getPeerEntityId();
         QName peerEntityRole = samlContext.getPeerEntityRole();
 
         if (peerEntityId == null) {
-            throw new MetadataProviderException("Peer entity ID wasn't specified, but is requested");
+            throw new ResolverException("Peer entity ID wasn't specified, but is requested");
         }
 
         EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(peerEntityId);
@@ -185,7 +188,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(peerEntityId);
 
         if (entityDescriptor == null || roleDescriptor == null) {
-            throw new MetadataProviderException("Metadata for entity " + peerEntityId + " and role " + peerEntityRole + " wasn't found");
+            throw new ResolverException("Metadata for entity " + peerEntityId + " and role " + peerEntityRole + " wasn't found");
         }
 
         samlContext.setPeerEntityMetadata(entityDescriptor);
@@ -195,7 +198,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
-    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws MetadataProviderException {
+    protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws ResolverException {
 
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
         HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, request.isSecure());
@@ -211,7 +214,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     }
 
-    protected void populateLocalContext(SAMLMessageContext context) throws MetadataProviderException {
+    protected void populateLocalContext(SAMLMessageContext context) throws ResolverException {
 
         populateLocalEntity(context);
         populateDecrypter(context);
@@ -232,9 +235,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      *
      * @param context     context to populate fields localEntityId and localEntityRole for
      * @param requestURI context path to parse entityId and entityRole from
-     * @throws MetadataProviderException in case entityId can't be populated
+     * @throws ResolverException in case entityId can't be populated
      */
-    protected void populateLocalEntityId(SAMLMessageContext context, String requestURI) throws MetadataProviderException {
+    protected void populateLocalEntityId(SAMLMessageContext context, String requestURI) throws ResolverException {
 
         String entityId;
         HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
@@ -276,7 +279,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             entityId = metadata.getEntityIdForAlias(localAlias);
 
             if (entityId == null) {
-                throw new MetadataProviderException("No local entity found for alias " + localAlias + ", verify your configuration.");
+                throw new ResolverException("No local entity found for alias " + localAlias + ", verify your configuration.");
             } else {
                 logger.debug("Using SP {} specified in request with alias {}", entityId, localAlias);
             }
@@ -299,16 +302,16 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      * are used instead.
      *
      * @param samlContext context to populate
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
+     * @throws ResolverException
      *          in case metadata do not contain expected entities or localAlias is specified but not found
      */
-    protected void populateLocalEntity(SAMLMessageContext samlContext) throws MetadataProviderException {
+    protected void populateLocalEntity(SAMLMessageContext samlContext) throws ResolverException {
 
         String localEntityId = samlContext.getLocalEntityId();
         QName localEntityRole = samlContext.getLocalEntityRole();
 
         if (localEntityId == null) {
-            throw new MetadataProviderException("No hosted service provider is configured and no alias was selected");
+            throw new ResolverException("No hosted service provider is configured and no alias was selected");
         }
 
         EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(localEntityId);
@@ -316,7 +319,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(localEntityId);
 
         if (entityDescriptor == null || roleDescriptor == null) {
-            throw new MetadataProviderException("Metadata for entity " + localEntityId + " and role " + localEntityRole + " wasn't found");
+            throw new ResolverException("Metadata for entity " + localEntityId + " and role " + localEntityRole + " wasn't found");
         }
 
         samlContext.setLocalEntityMetadata(entityDescriptor);

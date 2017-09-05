@@ -14,9 +14,9 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
@@ -25,6 +25,6 @@ import org.springframework.security.saml.storage.SAMLMessageStorage;
  */
 public interface WebSSOProfile {
 
-    void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options) throws SAMLException, ResolverException, MessageEncodingException;
 
 }

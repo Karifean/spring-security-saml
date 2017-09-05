@@ -15,9 +15,9 @@
 package org.springframework.security.saml.storage;
 
 import org.junit.Test;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Audience;
-import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.Audience;
+import org.opensaml.saml.saml2.core.AuthnRequest;
 import org.springframework.security.saml.parser.SAMLObject;
 
 import javax.servlet.http.HttpSession;

@@ -23,10 +23,10 @@ package org.opensaml.liberty.binding.decoding;
 import javax.xml.namespace.QName;
 
 import org.opensaml.common.BaseTestCase;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.security.SecurityException;
+import org.opensaml.security.SecurityException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.context.SAMLMessageContext;
 

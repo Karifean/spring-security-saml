@@ -15,8 +15,9 @@
  */
 package org.opensaml.ws.transport.http;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.opensaml.xml.security.credential.Credential;
+// import org.apache.commons.httpclient.methods.PostMethod;
+
+import org.opensaml.security.credential.Credential;
 
 import java.io.IOException;
 import java.io.InputStream;

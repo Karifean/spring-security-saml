@@ -15,6 +15,30 @@
  */
 package org.springframework.security.saml.websso;
 
+import net.shibboleth.utilities.java.support.net.URIException;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.criteria.UsageCriterion;
+import org.opensaml.ws.transport.http.HttpClientInTransport;
+import org.opensaml.ws.transport.http.HttpClientOutTransport;
+import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
+
+import javax.net.ssl.HostnameVerifier;
+import java.io.IOException;
+
+/*
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.URI;
@@ -23,26 +47,12 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.security.MetadataCriteria;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.soap.client.http.TLSProtocolSocketFactory;
-import org.opensaml.ws.transport.http.HttpClientInTransport;
-import org.opensaml.ws.transport.http.HttpClientOutTransport;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.security.criteria.UsageCriteria;
-import org.springframework.security.saml.context.SAMLMessageContext;
+*/
+
 import org.springframework.security.saml.trust.X509KeyManager;
 import org.springframework.security.saml.trust.X509TrustManager;
 
-import javax.net.ssl.HostnameVerifier;
-import java.io.IOException;
+import java.net.URI;
 
 /**
  * Implementation of the artifact resolution protocol which uses Apache HTTPClient for SOAP binding transport.
@@ -69,19 +79,20 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
      * @throws SAMLException             error processing artifact messages
      * @throws MessageEncodingException  error sending artifactRequest
      * @throws MessageDecodingException  error retrieving artifactResponse
-     * @throws MetadataProviderException error resolving metadata
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws ResolverException error resolving metadata
+     * @throws org.opensaml.security.SecurityException
      *                                   invalid message signature
      */
-    protected void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, MetadataProviderException, org.opensaml.xml.security.SecurityException {
+    protected void getArtifactResponse(String endpointURI, SAMLMessageContext context) throws SAMLException, MessageEncodingException, MessageDecodingException, ResolverException, org.opensaml.security.SecurityException {
 
-        PostMethod postMethod = null;
+        HttpPost postMethod = null;
 
         try {
 
             URI uri = new URI(context.getPeerEntityEndpoint().getLocation(), true, "UTF-8");
-            postMethod = new PostMethod();
-            postMethod.setPath(uri.getPath());
+//            postMethod = new PostMethod();
+//            postMethod.setPath(uri.getPath());
+            postMethod = new HttpPost(uri);
 
             HostConfiguration hc = getHostConfiguration(uri, context);
 
@@ -96,9 +107,12 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
             processor.sendMessage(context, signMessage, SAMLConstants.SAML2_SOAP11_BINDING_URI);
 
             log.debug("Sending ArtifactResolution message to {}", uri);
-            int responseCode = httpClient.executeMethod(hc, postMethod);
+            HttpResponse httpResponse = httpClient.execute(hc, postMethod);
+//            int responseCode = httpClient.execute(hc, postMethod);
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != 200) {
-                String responseBody = postMethod.getResponseBodyAsString();
+                String responseBody = EntityUtils.toString(httpResponse.getEntity());
+//                String responseBody = postMethod.getResponseBodyAsString();
                 throw new MessageDecodingException("Problem communicating with Artifact Resolution service, received response " + responseCode + ", body " + responseBody);
             }
 
@@ -142,6 +156,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
 
         try {
 
+            // HttpHost ?
             HostConfiguration hc = httpClient.getHostConfiguration();
 
             if (hc != null) {
@@ -162,9 +177,9 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
                 log.debug("Using HTTPS configuration");
 
                 CriteriaSet criteriaSet = new CriteriaSet();
-                criteriaSet.add(new EntityIDCriteria(context.getPeerEntityId()));
+                criteriaSet.add(new EntityIdCriterion(context.getPeerEntityId()));
                 criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
-                criteriaSet.add(new UsageCriteria(UsageType.UNSPECIFIED));
+                criteriaSet.add(new UsageCriterion(UsageType.UNSPECIFIED));
 
                 X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());
                 X509KeyManager manager = new X509KeyManager(context.getLocalSSLCredential());

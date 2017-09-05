@@ -16,7 +16,7 @@ package org.springframework.security.saml;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.springframework.context.ApplicationContext;

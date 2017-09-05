@@ -14,10 +14,11 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.key.KeyManager;
@@ -34,7 +35,7 @@ import java.util.LinkedList;
  *
  * @author Vladimir Schafer
  */
-public class MetadataCredentialResolver extends org.opensaml.security.MetadataCredentialResolver {
+public class MetadataCredentialResolver extends org.opensaml.saml.security.impl.MetadataCredentialResolver {
 
     /**
      * Class logger.
@@ -127,7 +128,7 @@ public class MetadataCredentialResolver extends org.opensaml.security.MetadataCr
 
             return credentials;
 
-        } catch (MetadataProviderException e) {
+        } catch (ResolverException e) {
 
             throw new SecurityException("Error loading metadata information", e);
 

@@ -14,12 +14,16 @@
  */
 package org.springframework.security.saml.key;
 
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
+import net.shibboleth.utilities.java.support.annotation.constraint.NonnullElements;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.security.SecurityException;
+import org.opensaml.security.credential.Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -60,12 +64,12 @@ public class EmptyKeyManager implements KeyManager {
     }
 
     @Override
-    public Iterable<Credential> resolve(CriteriaSet criteria) throws SecurityException {
+    public Iterable<Credential> resolve(CriteriaSet criteria) throws ResolverException {
         return null;
     }
 
     @Override
-    public Credential resolveSingle(CriteriaSet criteria) throws SecurityException {
+    public Credential resolveSingle(CriteriaSet criteria) throws ResolverException {
         return null;
     }
 

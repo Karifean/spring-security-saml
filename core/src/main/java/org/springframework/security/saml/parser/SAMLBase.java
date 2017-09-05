@@ -15,14 +15,16 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.parse.XMLParserException;
-import org.opensaml.xml.util.XMLHelper;
+import net.shibboleth.utilities.java.support.xml.QNameSupport;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+//import org.opensaml.xml.Configuration;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -82,7 +84,7 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
      *
      * @return the inbound message
      *
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws org.opensaml.messaging.decoder.MessageDecodingException
      *          thrown if there is a problem deserializing and unmarshalling the message
      */
     protected T unmarshallMessage(Reader messageStream) throws MessageDecodingException {
@@ -93,15 +95,15 @@ public abstract class SAMLBase<T extends XMLObject, U> implements Serializable {
             Element messageElem = messageDoc.getDocumentElement();
 
             if (log.isTraceEnabled()) {
-                log.trace("Unmarshalled message into DOM:\n{}", XMLHelper.nodeToString(messageElem));
+                log.trace("Unmarshalled message into DOM:\n{}", SerializeSupport.nodeToString(messageElem));
             }
 
             log.debug("Unmarshalling message DOM");
-            Unmarshaller unmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(messageElem);
+            Unmarshaller unmarshaller = XMLObjectProviderRegistrySupport.getUnmarshallerFactory().getUnmarshaller(messageElem);
             if (unmarshaller == null) {
                 throw new MessageDecodingException(
                         "Unable to unmarshall message, no unmarshaller registered for message element "
-                        + XMLHelper.getNodeQName(messageElem));
+                        + QNameSupport.getNodeQName(messageElem));
             }
 
             T message = (T) unmarshaller.unmarshall(messageElem);

@@ -14,10 +14,11 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.util.SimpleURLCanonicalizer;
+import net.shibboleth.utilities.java.support.net.SimpleURLCanonicalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +131,7 @@ public class MetadataGeneratorFilter extends GenericFilterBean {
                         log.info("Created default metadata for system with entityID: " + descriptor.getEntityID());
                         MetadataMemoryProvider memoryProvider = new MetadataMemoryProvider(descriptor);
                         memoryProvider.initialize();
-                        MetadataProvider metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
+                        MetadataResolver metadataProvider = new ExtendedMetadataDelegate(memoryProvider, extendedMetadata);
 
                         manager.addMetadataProvider(metadataProvider);
                         manager.setHostedSPName(descriptor.getEntityID());

@@ -14,13 +14,14 @@
  */
 package org.springframework.security.saml.processor;
 
+import net.shibboleth.utilities.java.support.codec.Base64Support;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.core.Response;
-import org.opensaml.ws.message.decoder.MessageDecoder;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.security.SecurityException;
+import org.opensaml.security.SecurityException;
 import org.opensaml.xml.util.Base64;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

@@ -15,12 +15,13 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.BasicX509Credential;
-import org.opensaml.xml.security.x509.X509Credential;
+//import org.opensaml.xml.security.CriteriaSet;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.BasicX509Credential;
+import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,15 +67,15 @@ public class X509TrustManager implements javax.net.ssl.X509TrustManager {
             throw new IllegalArgumentException("Null or empty certificates list");
         }
 
-        BasicX509Credential credential = new BasicX509Credential();
         X509Certificate x509Certificate = x509Certificates[0];
-        credential.setEntityCertificate(x509Certificate);
+        BasicX509Credential credential = new BasicX509Credential(x509Certificate);
+//        credential.setEntityCertificate(x509Certificate);
         credential.setEntityCertificateChain(Arrays.asList(x509Certificates));
         credential.setUsageType(UsageType.UNSPECIFIED);
 
-        EntityIDCriteria entityIDCriteria = criteriaSet.get(EntityIDCriteria.class);
-        if (entityIDCriteria != null) {
-            credential.setEntityId(entityIDCriteria.getEntityID());
+        EntityIdCriterion entityIDCriterion = criteriaSet.get(EntityIdCriterion.class);
+        if (entityIDCriterion != null) {
+            credential.setEntityId(entityIDCriterion.getEntityId());
         }
 
         try {
@@ -90,7 +91,7 @@ public class X509TrustManager implements javax.net.ssl.X509TrustManager {
                 sb.append("is not trusted, add the certificate or it's CA to your trust store and optionally update tlsKey in extended metadata with the certificate's alias");
                 throw new UntrustedCertificateException(sb.toString(), x509Certificates);
             }
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (org.opensaml.security.SecurityException e) {
             throw new CertificateException("Error validating certificate", e);
         }
 

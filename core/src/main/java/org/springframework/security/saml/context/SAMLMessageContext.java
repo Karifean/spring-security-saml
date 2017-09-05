@@ -15,13 +15,18 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.common.binding.BasicSAMLMessageContext;
-import org.opensaml.saml2.encryption.Decrypter;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.signature.SignatureTrustEngine;
+import org.opensaml.messaging.context.MessageContext;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.messaging.context.SAMLBindingContext;
+import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
+import org.opensaml.saml.common.messaging.context.SAMLSubjectNameIdentifierContext;
+import org.opensaml.saml.saml2.core.NameID;
+import org.opensaml.saml.saml2.encryption.Decrypter;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.X509Credential;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
@@ -32,7 +37,7 @@ import javax.net.ssl.HostnameVerifier;
  *
  * @author Vladimir Schaefer
  */
-public class SAMLMessageContext extends BasicSAMLMessageContext {
+public class SAMLMessageContext extends MessageContext {
 
     private Decrypter localDecrypter;
     private Credential localSigningCredential;
@@ -47,6 +52,18 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     private boolean peerUserSelected;
     private String inboundSAMLBinding;
     private SAMLMessageStorage messageStorage;
+
+    /** Unique id of the communication profile in use. */
+    // mpr entspricht dieses Feld dem SAMLProtocolContext.protocol  ?
+    private String communicationProfile;
+
+    public void setCommunicationProfileId(String id) {
+        communicationProfile = id;
+    }
+
+    public String getCommunicationProfileId() {
+        return communicationProfile;
+    }
 
     /**
      * Extended metadata of the local entity
@@ -230,4 +247,23 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
         this.messageStorage = messageStorage;
     }
 
+    public SAMLObject getSubjectNameIdentifier() {
+        SAMLSubjectNameIdentifierContext SAMLSubjectNameIdentifierContext = getSubcontext(SAMLSubjectNameIdentifierContext.class, true);
+        return SAMLSubjectNameIdentifierContext.getSubjectNameIdentifier();
+    }
+
+    public void setSubjectNameIdentifier(NameID nameID) {
+        SAMLSubjectNameIdentifierContext SAMLSubjectNameIdentifierContext = getSubcontext(SAMLSubjectNameIdentifierContext.class, true);
+         SAMLSubjectNameIdentifierContext.setSubjectNameIdentifier(nameID);
+    }
+
+    public String getRelayState() {
+        SAMLBindingContext SAMLBindingContext = getSubcontext(SAMLBindingContext.class, true);
+        return SAMLBindingContext.getRelayState();
+    }
+
+    public void setRelayState(String relayState) {
+        SAMLBindingContext SAMLBindingContext = getSubcontext(SAMLBindingContext.class, true);
+        SAMLBindingContext.setRelayState(relayState);
+    }
 }

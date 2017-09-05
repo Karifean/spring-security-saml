@@ -18,12 +18,13 @@ package org.opensaml.liberty.paos.impl;
 
 import javax.xml.namespace.QName;
 
-import org.opensaml.common.impl.AbstractSAMLObjectUnmarshaller;
+//import org.opensaml.common.impl.AbstractSAMLObjectUnmarshaller;
+import net.shibboleth.utilities.java.support.xml.QNameSupport;
 import org.opensaml.liberty.paos.Request;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.schema.XSBooleanValue;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.schema.XSBooleanValue;
+import org.opensaml.saml.common.AbstractSAMLObjectUnmarshaller;
 import org.w3c.dom.Attr;
 
 /**
@@ -36,7 +37,7 @@ public class RequestUnmarshaller extends AbstractSAMLObjectUnmarshaller {
             throws UnmarshallingException {
         Request request = (Request) samlObject;
         
-        QName attrName = XMLHelper.getNodeQName(attribute);
+        QName attrName = QNameSupport.getNodeQName(attribute);
         if (Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME.equals(attrName)) {
             request.setSOAP11MustUnderstand(XSBooleanValue.valueOf(attribute.getValue()));
         } else if (Request.SOAP11_ACTOR_ATTR_NAME.equals(attrName)) {

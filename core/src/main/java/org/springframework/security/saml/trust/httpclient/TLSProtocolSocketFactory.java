@@ -1,12 +1,14 @@
 package org.springframework.security.saml.trust.httpclient;
 
-import org.apache.commons.httpclient.params.HttpConnectionParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.trust.TrustEngine;
-import org.opensaml.xml.security.x509.*;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+//import org.apache.commons.httpclient.params.HttpConnectionParams;
+//import org.apache.commons.httpclient.protocol.Protocol;
+//import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+//import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
+import org.apache.http.params.HttpConnectionParams;
+import org.opensaml.security.trust.TrustEngine;
+import org.opensaml.security.x509.*;
+import org.opensaml.security.x509.impl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

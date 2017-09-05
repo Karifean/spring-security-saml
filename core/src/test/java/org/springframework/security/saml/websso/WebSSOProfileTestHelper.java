@@ -1,11 +1,14 @@
 package org.springframework.security.saml.websso;
 
 import org.joda.time.DateTime;
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.schema.XSString;
+//import org.opensaml.Configuration;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.saml2.core.Response;
+import org.opensaml.saml.saml2.core.*;
+//import org.opensaml.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.schema.XSString;
 
 import java.util.Collection;
 
@@ -17,7 +20,7 @@ public class WebSSOProfileTestHelper {
     XMLObjectBuilderFactory builderFactory;
 
     public WebSSOProfileTestHelper(XMLObjectBuilderFactory builderFactory) {
-        this.builderFactory = Configuration.getBuilderFactory();
+        this.builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
     }
 
     public Response getValidResponse() {
@@ -25,7 +28,7 @@ public class WebSSOProfileTestHelper {
         Response response = builder.buildObject();
 
         StatusCode statusCode = ((SAMLObjectBuilder<StatusCode>) builderFactory.getBuilder(StatusCode.DEFAULT_ELEMENT_NAME)).buildObject();
-        statusCode.setValue(StatusCode.SUCCESS_URI);
+        statusCode.setValue(StatusCode.SUCCESS);
         Status status = ((SAMLObjectBuilder<Status>) builderFactory.getBuilder(Status.DEFAULT_ELEMENT_NAME)).buildObject();
         status.setStatusCode(statusCode);
         response.setStatus(status);

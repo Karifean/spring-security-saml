@@ -14,24 +14,27 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.common.Extensions;
-import org.opensaml.saml2.common.impl.ExtensionsBuilder;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.core.NameIDType;
-import org.opensaml.saml2.metadata.*;
-import org.opensaml.samlext.idpdisco.DiscoveryResponse;
-import org.opensaml.util.URLBuilder;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.security.SecurityHelper;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.UsageType;
-import org.opensaml.xml.security.keyinfo.KeyInfoGenerator;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.util.Pair;
+import net.shibboleth.utilities.java.support.collection.Pair;
+//import org.opensaml.Configuration;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.ext.idpdisco.DiscoveryResponse;
+//import org.opensaml.saml2.common.Extensions;
+//import org.opensaml.saml2.common.impl.ExtensionsBuilder;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.core.NameIDType;
+import org.opensaml.saml.saml2.metadata.impl.ExtensionsBuilder;
+import org.opensaml.saml.saml2.metadata.*;
+//import org.opensaml.samlext.idpdisco.DiscoveryResponse;
+import net.shibboleth.utilities.java.support.net.URLBuilder;
+//import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.UsageType;
+import org.opensaml.xmlsec.keyinfo.KeyInfoGenerator;
+import org.opensaml.xmlsec.signature.KeyInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,7 @@ import org.springframework.security.saml.key.KeyManager;
 import org.springframework.security.saml.util.SAMLUtil;
 
 import javax.xml.namespace.QName;
+import java.net.MalformedURLException;
 import java.util.*;
 
 /**
@@ -158,7 +162,7 @@ public class MetadataGenerator {
      * Default constructor.
      */
     public MetadataGenerator() {
-        this.builderFactory = Configuration.getBuilderFactory();
+        this.builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
     }
 
     public EntityDescriptor generateMetadata() {
@@ -254,7 +258,7 @@ public class MetadataGenerator {
             }
             KeyInfoGenerator keyInfoGenerator = SecurityHelper.getKeyInfoGenerator(credential, null, keyInfoGeneratorName);
             return keyInfoGenerator.generate(credential);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+        } catch (org.opensaml.security.SecurityException e) {
             log.error("Can't obtain key from the keystore or generate key info for credential: " + credential, e);
             throw new SAMLRuntimeException("Can't obtain key from keystore or generate key info", e);
         }
@@ -387,7 +391,7 @@ public class MetadataGenerator {
     }
 
     protected KeyDescriptor getKeyDescriptor(UsageType type, KeyInfo key) {
-        SAMLObjectBuilder<KeyDescriptor> builder = (SAMLObjectBuilder<KeyDescriptor>) Configuration.getBuilderFactory().getBuilder(KeyDescriptor.DEFAULT_ELEMENT_NAME);
+        SAMLObjectBuilder<KeyDescriptor> builder = (SAMLObjectBuilder<KeyDescriptor>) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(KeyDescriptor.DEFAULT_ELEMENT_NAME);
         KeyDescriptor descriptor = builder.buildObject();
         descriptor.setUse(type);
         descriptor.setKeyInfo(key);
@@ -462,7 +466,7 @@ public class MetadataGenerator {
     protected DiscoveryResponse getDiscoveryService(String entityBaseURL, String entityAlias) {
         SAMLObjectBuilder<DiscoveryResponse> builder = (SAMLObjectBuilder<DiscoveryResponse>) builderFactory.getBuilder(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
         DiscoveryResponse discovery = builder.buildObject(DiscoveryResponse.DEFAULT_ELEMENT_NAME);
-        discovery.setBinding(DiscoveryResponse.IDP_DISCO_NS);
+        discovery.setBinding(SAMLConstants.SAML_IDP_DISCO_NS);
         discovery.setLocation(getDiscoveryResponseURL(entityBaseURL, entityAlias));
         return discovery;
     }
@@ -522,7 +526,12 @@ public class MetadataGenerator {
         } else {
 
             // Add parameters
-            URLBuilder returnUrlBuilder = new URLBuilder(resultString);
+            URLBuilder returnUrlBuilder = null;
+            try {
+                returnUrlBuilder = new URLBuilder(resultString);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
                 returnUrlBuilder.getQueryParams().add(new Pair<String, String>(entry.getKey(), entry.getValue()));
             }

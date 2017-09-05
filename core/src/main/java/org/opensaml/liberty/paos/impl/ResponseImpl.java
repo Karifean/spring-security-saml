@@ -18,10 +18,10 @@ package org.opensaml.liberty.paos.impl;
 
 import java.util.List;
 
-import org.opensaml.common.impl.AbstractSAMLObject;
 import org.opensaml.liberty.paos.Response;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.schema.XSBooleanValue;
+import org.opensaml.saml.common.AbstractSAMLObject;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.schema.XSBooleanValue;
 
 public class ResponseImpl extends AbstractSAMLObject implements Response {
     

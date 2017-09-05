@@ -16,11 +16,10 @@
 
 package org.opensaml.liberty.paos.impl;
 
-import org.opensaml.common.impl.AbstractSAMLObjectMarshaller;
+import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.liberty.paos.Response;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.saml.common.AbstractSAMLObjectMarshaller;
+import org.opensaml.core.xml.XMLObject;
 import org.w3c.dom.Element;
 
 /**
@@ -38,6 +37,7 @@ public class ResponseMarshaller extends AbstractSAMLObjectMarshaller {
                     response.getRefToMessageID());
         }
         if (response.isSOAP11MustUnderstandXSBoolean() != null) {
+            // AttributeSupport ?
             XMLHelper.marshallAttribute(Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME, 
                     response.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
         }

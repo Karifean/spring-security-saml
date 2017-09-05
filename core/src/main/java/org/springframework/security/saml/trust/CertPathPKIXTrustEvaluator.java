@@ -14,11 +14,10 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.x509.PKIXValidationInformation;
-import org.opensaml.xml.security.x509.PKIXValidationOptions;
-import org.opensaml.xml.security.x509.X509Credential;
-import org.opensaml.xml.security.x509.X509Util;
+import org.opensaml.security.x509.X509Support;
+import org.opensaml.security.x509.PKIXValidationInformation;
+import org.opensaml.security.x509.PKIXValidationOptions;
+import org.opensaml.security.x509.X509Credential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,7 @@ import java.security.cert.*;
  * In earlier Java versions the builder implementation doesn't support e.g. OCSP checking. Running a separate path
  * validation makes it possible to use these features..
  */
-public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.CertPathPKIXTrustEvaluator {
+public class CertPathPKIXTrustEvaluator extends org.opensaml.security.x509.impl.CertPathPKIXTrustEvaluator {
 
     /**
      * Class logger.
@@ -61,11 +60,11 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
 
     /** {@inheritDoc} */
     public boolean validate(PKIXValidationInformation validationInfo, X509Credential untrustedCredential)
-            throws org.opensaml.xml.security.SecurityException {
+            throws SecurityException {
 
         if (log.isDebugEnabled()) {
             log.debug("Attempting PKIX path validation on untrusted credential: {}",
-                    X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
+                    X509Support.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
         }
 
         try {
@@ -86,7 +85,7 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
             if (log.isDebugEnabled()) {
                 logCertPathDebug(buildResult, untrustedCredential.getEntityCertificate());
                 log.debug("PKIX validation succeeded for untrusted credential: {}",
-                        X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
+                        X509Support.getIdentifiersToken(untrustedCredential, getX500DNHandler()));
             }
 
             if (validateCertPath) {
@@ -106,10 +105,10 @@ public class CertPathPKIXTrustEvaluator extends org.opensaml.xml.security.x509.C
         } catch (CertPathBuilderException e) {
             if (log.isTraceEnabled()) {
                 log.trace("PKIX path construction failed for untrusted credential: "
-                        + X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()), e);
+                        + X509Support.getIdentifiersToken(untrustedCredential, getX500DNHandler()), e);
             } else {
                 log.error("PKIX path construction failed for untrusted credential: "
-                        + X509Util.getIdentifiersToken(untrustedCredential, getX500DNHandler()) + ": " + e.getMessage());
+                        + X509Support.getIdentifiersToken(untrustedCredential, getX500DNHandler()) + ": " + e.getMessage());
             }
             return false;
         } catch (GeneralSecurityException e) {

@@ -14,10 +14,13 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.metadata.resolver.impl.AbstractMetadataResolver;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
+//import org.opensaml.saml2.metadata.provider.AbstractMetadataProvider;
+//import org.opensaml.saml2.metadata.provider.MetadataProvider;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +81,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      *
      * @param delegate delegate with available entities
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate) {
+    public ExtendedMetadataDelegate(MetadataResolver delegate) {
         this(delegate, null, null);
     }
 
@@ -88,7 +91,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * @param delegate        delegate with available entities
      * @param defaultMetadata default extended metadata, can be null
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate, ExtendedMetadata defaultMetadata) {
+    public ExtendedMetadataDelegate(MetadataResolver delegate, ExtendedMetadata defaultMetadata) {
         this(delegate, defaultMetadata, null);
     }
 
@@ -98,7 +101,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * @param delegate            delegate with available entities
      * @param extendedMetadataMap map, can be null
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate, Map<String, ExtendedMetadata> extendedMetadataMap) {
+    public ExtendedMetadataDelegate(MetadataResolver delegate, Map<String, ExtendedMetadata> extendedMetadataMap) {
         this(delegate, null, extendedMetadataMap);
     }
 
@@ -110,7 +113,7 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * @param defaultMetadata     default extended metadata, can be null
      * @param extendedMetadataMap map, can be null
      */
-    public ExtendedMetadataDelegate(MetadataProvider delegate, ExtendedMetadata defaultMetadata, Map<String, ExtendedMetadata> extendedMetadataMap) {
+    public ExtendedMetadataDelegate(MetadataResolver delegate, ExtendedMetadata defaultMetadata, Map<String, ExtendedMetadata> extendedMetadataMap) {
         super(delegate);
         if (defaultMetadata == null) {
             this.defaultMetadata = new ExtendedMetadata();
@@ -132,9 +135,9 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      *
      * @param entityID entity to load metadata for
      * @return extended metadata or null in case no default is given and entity can be located or is not present in the delegate
-     * @throws MetadataProviderException error
+     * @throws ResolverException error
      */
-    public ExtendedMetadata getExtendedMetadata(String entityID) throws MetadataProviderException {
+    public ExtendedMetadata getExtendedMetadata(String entityID) throws ResolverException {
 
         EntityDescriptor entityDescriptor = getEntityDescriptor(entityID);
         if (entityDescriptor == null) {
@@ -158,13 +161,13 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
     /**
      * Method performs initialization of the provider it delegates to.
      *
-     * @throws MetadataProviderException in case initialization fails
+     * @throws ResolverException in case initialization fails
      */
-    public void initialize() throws MetadataProviderException {
-        if (getDelegate() instanceof AbstractMetadataProvider) {
+    public void initialize() /* throws MetadataProviderException */ {
+        if (getDelegate() instanceof AbstractMetadataResolver) {
             log.debug("Initializing delegate");
-            AbstractMetadataProvider provider = (AbstractMetadataProvider) getDelegate();
-            provider.initialize();
+            AbstractMetadataResolver provider = (AbstractMetadataResolver) getDelegate();
+//            provider.initialize();
         } else {
             log.debug("Cannot initialize delegate, doesn't extend AbstractMetadataProvider");
         }
@@ -174,9 +177,9 @@ public class ExtendedMetadataDelegate extends AbstractMetadataDelegate implement
      * Method destroys the metadata delegate.
      */
     public void destroy() {
-        if (getDelegate() instanceof AbstractMetadataProvider) {
+        if (getDelegate() instanceof AbstractMetadataResolver) {
             log.debug("Destroying delegate");
-            AbstractMetadataProvider provider = (AbstractMetadataProvider) getDelegate();
+            AbstractMetadataResolver provider = (AbstractMetadataResolver) getDelegate();
             provider.destroy();
         } else {
             log.debug("Cannot destroy delegate, doesn't extend AbstractMetadataProvider");

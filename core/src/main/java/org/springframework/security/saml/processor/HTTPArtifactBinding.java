@@ -16,18 +16,18 @@ package org.springframework.security.saml.processor;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml2.binding.decoding.HTTPArtifactDecoderImpl;
-import org.opensaml.saml2.binding.encoding.HTTPArtifactEncoder;
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.message.encoder.MessageEncoder;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPArtifactEncoder;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.ws.security.SecurityPolicyRule;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.OutTransport;
 import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
-import org.opensaml.xml.parse.ParserPool;
-import org.opensaml.xml.signature.SignatureTrustEngine;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
+import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 

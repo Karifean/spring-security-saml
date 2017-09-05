@@ -14,12 +14,13 @@
  */
 package org.springframework.security.saml.websso;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.core.*;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.util.Base64;
+import net.shibboleth.utilities.java.support.codec.Base64Support;
+import net.shibboleth.utilities.java.support.net.URIException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.core.*;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.signature.KeyInfo;
 import org.springframework.security.saml.SAMLConstants;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.util.SAMLUtil;
@@ -52,12 +53,12 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
      * @param subject subject to validate
      * @param request request
      * @param context context
-     * @throws org.opensaml.common.SAMLException
+     * @throws org.opensaml.saml.common.SAMLException
      *          error validating the object
-     * @throws org.opensaml.xml.encryption.DecryptionException
+     * @throws org.opensaml.xmlsec.encryption.support.DecryptionException
      *          in case the NameID can't be decrypted
      */
-    protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException {
+    protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException, URIException {
 
         String userAgentCertificate = getUserAgentBase64Certificate(context);
 
@@ -166,7 +167,7 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
         }
 
         try {
-            return Base64.encodeBytes(context.getPeerSSLCredential().getEntityCertificate().getEncoded());
+            return Base64Support.encode(context.getPeerSSLCredential().getEntityCertificate().getEncoded(), false);
         } catch (CertificateEncodingException e) {
             throw new SAMLException("Error base64 encoding peer certificate");
         }

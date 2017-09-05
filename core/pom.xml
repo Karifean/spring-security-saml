@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.security.extensions</groupId>
   <artifactId>spring-security-saml2-core</artifactId>
-  <version>1.0.1.BUILD-SNAPSHOT</version>
+  <version>1.0.2.BUILD-SNAPSHOT</version>
   <name>Spring Security SAML v2 library</name>
   <description>Spring Security SAML v2 library</description>
   <url>https://github.com/SpringSource/spring-security-saml</url>
@@ -57,11 +57,15 @@
     <developerConnection>scm:git:git://github.com/SpringSource/spring-security-saml</developerConnection>
     <url>https://github.com/SpringSource/spring-security-saml</url>
   </scm>
+  <properties>
+    <spring-framework.version>3.2.4.RELEASE</spring-framework.version>
+    <spring-security.version>3.1.4.RELEASE</spring-security.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.opensaml</groupId>
-      <artifactId>opensaml</artifactId>
-      <version>2.6.1</version>
+      <artifactId>opensaml-core</artifactId>
+      <version>3.1.1</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -69,12 +73,12 @@
           <groupId>org.apache.xerces</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>jcl-over-slf4j</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>serializer</artifactId>
           <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
         </exclusion>
         <exclusion>
           <artifactId>log4j-over-slf4j</artifactId>
@@ -82,6 +86,239 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-messaging-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+<!-- mpr -->
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-saml-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-storage-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-xmlsec-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-security-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-security-impl</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-saml-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-saml-impl</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>serializer</artifactId>
+          <groupId>org.apache.xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/net.shibboleth.utilities/java-support -->
+    <dependency>
+      <groupId>net.shibboleth.utilities</groupId>
+      <artifactId>java-support</artifactId>
+      <version>7.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <!--
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-asm</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-expression</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <!-- mpr ende -->
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -155,7 +392,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>3.1.2.RELEASE</version>
+      <version>${spring-framework.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>

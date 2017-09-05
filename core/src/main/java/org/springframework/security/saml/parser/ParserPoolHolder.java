@@ -14,8 +14,9 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.xml.parse.BasicParserPool;
-import org.opensaml.xml.parse.ParserPool;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -53,7 +54,14 @@ public final class ParserPoolHolder {
      */
     public synchronized static ParserPool getPool() {
         if (pool == null) {
-            setPool(new BasicParserPool());
+        	BasicParserPool parserPool = new BasicParserPool();
+        	try {
+				parserPool.initialize();
+			} catch (ComponentInitializationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            setPool(parserPool);
         }
         return pool;
     }

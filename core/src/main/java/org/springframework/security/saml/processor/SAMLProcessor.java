@@ -14,10 +14,11 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.SAMLException;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 /**
@@ -29,9 +30,9 @@ import org.springframework.security.saml.context.SAMLMessageContext;
  */
 public interface SAMLProcessor {
 
-    SAMLMessageContext retrieveMessage(SAMLMessageContext context, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
-    SAMLMessageContext retrieveMessage(SAMLMessageContext context) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException;
-    SAMLMessageContext sendMessage(SAMLMessageContext context, boolean sign, String binding) throws SAMLException, MetadataProviderException, MessageEncodingException;
-    SAMLMessageContext sendMessage(SAMLMessageContext context, boolean sign) throws SAMLException, MetadataProviderException, MessageEncodingException;
+    SAMLMessageContext retrieveMessage(SAMLMessageContext context, String binding) throws SAMLException, ResolverException, MessageDecodingException, org.opensaml.security.SecurityException;
+    SAMLMessageContext retrieveMessage(SAMLMessageContext context) throws SAMLException, ResolverException, MessageDecodingException, org.opensaml.security.SecurityException;
+    SAMLMessageContext sendMessage(SAMLMessageContext context, boolean sign, String binding) throws SAMLException, ResolverException, MessageEncodingException;
+    SAMLMessageContext sendMessage(SAMLMessageContext context, boolean sign) throws SAMLException, ResolverException, MessageEncodingException;
     
 }

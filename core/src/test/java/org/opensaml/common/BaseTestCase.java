@@ -16,23 +16,27 @@
 
 package org.opensaml.common;
 
+import javax.naming.ConfigurationException;
 import javax.xml.namespace.QName;
 
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.opensaml.Configuration;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.parse.BasicParserPool;
-import org.opensaml.xml.parse.XMLParserException;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.core.config.Configuration;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilder;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallerFactory;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import net.shibboleth.utilities.java.support.xml.XMLParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -59,24 +63,37 @@ public abstract class BaseTestCase extends XMLTestCase {
     private static Logger log = LoggerFactory.getLogger(BaseTestCase.class);
     
     /** Constructor. */
-    public BaseTestCase(){
+    public BaseTestCase() {
         super();
-        
+        try {
+			InitializationService.initialize();
+		} catch (InitializationException e1) {
+			e1.printStackTrace();
+            throw new RuntimeException("InitializationException in BaseTestCase()");
+		}
         parser = new BasicParserPool();
         parser.setNamespaceAware(true);
-        builderFactory = Configuration.getBuilderFactory();
-        marshallerFactory = Configuration.getMarshallerFactory();
-        unmarshallerFactory = Configuration.getUnmarshallerFactory();
+        try {
+            parser.initialize();
+        } catch (ComponentInitializationException e) {
+            e.printStackTrace();
+            throw new RuntimeException("ComponentInitializationException in BaseTestCase()");
+        }
+        builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+        marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+        unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
     }
 
     /** {@inheritDoc} */
     protected void setUp() throws Exception {
         super.setUp();
         XMLUnit.setIgnoreWhitespace(true);
-        
+
+        InitializationService.initialize();
+
         try{
             BootstrapHelper.bootstrap();
-        }catch(ConfigurationException e){
+        }catch(Exception e){
             fail(e.getMessage());
         }
     }
@@ -113,7 +130,7 @@ public abstract class BaseTestCase extends XMLTestCase {
         try {
             Element generatedDOM = marshaller.marshall(xmlObject, parser.newDocument());
             if(log.isDebugEnabled()) {
-                log.debug("Marshalled DOM was " + XMLHelper.nodeToString(generatedDOM));
+                log.debug("Marshalled DOM was " + SerializeSupport.nodeToString(generatedDOM));
             }
             assertXMLEqual(failMessage, expectedDOM, generatedDOM.getOwnerDocument());
         } catch (Exception e) {
@@ -130,7 +147,7 @@ public abstract class BaseTestCase extends XMLTestCase {
      * @return the build XMLObject
      */
     public XMLObject buildXMLObject(QName objectQName){
-        XMLObjectBuilder builder = Configuration.getBuilderFactory().getBuilder(objectQName);
+        XMLObjectBuilder builder = XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(objectQName);
         if(builder == null){
             fail("Unable to retrieve builder for object QName " + objectQName);
         }
@@ -150,7 +167,7 @@ public abstract class BaseTestCase extends XMLTestCase {
                     .getResourceAsStream(elementFile));
             Element samlElement = doc.getDocumentElement();
 
-            Unmarshaller unmarshaller = Configuration.getUnmarshallerFactory().getUnmarshaller(samlElement);
+            Unmarshaller unmarshaller = XMLObjectProviderRegistrySupport.getUnmarshallerFactory().getUnmarshaller(samlElement);
             if (unmarshaller == null) {
                 fail("Unable to retrieve unmarshaller by DOM Element");
             }

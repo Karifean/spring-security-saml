@@ -16,7 +16,7 @@ configure(allprojects) { project ->
 	group = "org.springframework.security.extensions"
 
 	ext.slf4jVersion = "1.6.3"
-	ext.springVersion = "3.1.2.RELEASE"
+	ext.springVersion = "4.1.9.RELEASE"
 	ext.springSecurityVersion = "3.1.2.RELEASE"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 

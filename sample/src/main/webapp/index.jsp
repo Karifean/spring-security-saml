@@ -1,9 +1,9 @@
 <%@ page import="org.springframework.security.saml.SAMLCredential" %>
 <%@ page import="org.springframework.security.core.context.SecurityContextHolder" %>
 <%@ page import="org.springframework.security.core.Authentication" %>
-<%@ page import="org.opensaml.saml2.core.Attribute" %>
+<%@ page import="org.opensaml.saml.saml2.core.Attribute" %>
 <%@ page import="org.springframework.security.saml.util.SAMLUtil" %>
-<%@ page import="org.opensaml.xml.util.XMLHelper" %>
+<%@ page import="net.shibboleth.utilities.java.support.xml.SerializeSupport" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -24,7 +24,7 @@
                                 SAMLCredential credential = (SAMLCredential) authentication.getCredentials();
                                 pageContext.setAttribute("authentication", authentication);
                                 pageContext.setAttribute("credential", credential);
-                                pageContext.setAttribute("assertion", XMLHelper.nodeToString(SAMLUtil.marshallMessage(credential.getAuthenticationAssertion())));
+                                pageContext.setAttribute("assertion", SerializeSupport.nodeToString(SAMLUtil.marshallMessage(credential.getAuthenticationAssertion())));
                             %>
                             <p>
                             <table>

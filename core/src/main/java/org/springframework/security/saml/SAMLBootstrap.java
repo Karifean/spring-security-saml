@@ -14,11 +14,12 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.Configuration;
+//import org.opensaml.Configuration;
 import org.opensaml.PaosBootstrap;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.security.keyinfo.NamedKeyInfoGeneratorManager;
-import org.opensaml.xml.security.x509.X509KeyInfoGeneratorFactory;
+//import org.opensaml.xml.ConfigurationException;
+import org.opensaml.core.config.Configuration;
+import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
+import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -41,7 +42,7 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
         try {
             PaosBootstrap.bootstrap();
             setMetadataKeyInfoGenerator();
-        } catch (ConfigurationException e) {
+        } catch (Exception e) {
             throw new BootstrapException("Error invoking OpenSAML bootstrap", e);
         }
     }

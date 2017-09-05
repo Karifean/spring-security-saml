@@ -15,7 +15,8 @@
  */
 package org.springframework.security.saml.context;
 
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.springframework.security.saml.SAMLCredential;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +37,9 @@ public interface SAMLContextProvider {
      * @param request request
      * @param response response
      * @return context
-     * @throws MetadataProviderException in case of metadata problems
+     * @throws ResolverException in case of metadata problems
      */
-    SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException;
+    SAMLMessageContext getLocalEntity(HttpServletRequest request, HttpServletResponse response) throws ResolverException;
 
     /**
      * Creates a SAMLContext with local entity and peer values filled. Also request and response must be stored in the context
@@ -47,8 +48,8 @@ public interface SAMLContextProvider {
      * @param request request
      * @param response response
      * @return context
-     * @throws MetadataProviderException in case of metadata problems
+     * @throws ResolverException in case of metadata problems
      */
-    SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws MetadataProviderException;
+    SAMLMessageContext getLocalAndPeerEntity(HttpServletRequest request, HttpServletResponse response) throws ResolverException;
 
 }

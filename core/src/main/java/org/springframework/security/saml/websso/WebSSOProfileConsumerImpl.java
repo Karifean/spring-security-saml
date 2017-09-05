@@ -14,16 +14,17 @@
  */
 package org.springframework.security.saml.websso;
 
+import net.shibboleth.utilities.java.support.net.URIException;
 import org.joda.time.DateTime;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.saml2.metadata.SPSSODescriptor;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.encryption.DecryptionException;
-import org.opensaml.xml.signature.Signature;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.saml2.core.*;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
+import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.xmlsec.encryption.support.DecryptionException;
+import org.opensaml.xmlsec.signature.Signature;
+//import org.opensaml.xml.validation.ValidationException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -35,6 +36,7 @@ import org.springframework.security.saml.processor.SAMLProcessor;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 import org.springframework.util.Assert;
 
+import javax.xml.bind.ValidationException;
 import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -87,11 +89,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param context context including response object
      * @return SAMLCredential with information about user
      * @throws SAMLException       in case the response is invalid
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws org.opensaml.security.SecurityException
      *                             in the signature on response can't be verified
      * @throws ValidationException in case the response structure is not conforming to the standard
      */
-    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    public SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.security.SecurityException, ValidationException, DecryptionException, URIException {
 
         AuthnRequest request = null;
         SAMLObject message = context.getInboundSAMLMessage();
@@ -104,7 +106,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
 
         // Verify status
         String statusCode = response.getStatus().getStatusCode().getValue();
-        if (!StatusCode.SUCCESS_URI.equals(statusCode)) {
+        if (!StatusCode.SUCCESS.equals(statusCode)) {
             StatusMessage statusMessage = response.getStatus().getStatusMessage();
             String statusMessageText = null;
             if (statusMessage != null) {
@@ -279,7 +281,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         return null;
     }
 
-    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.xml.security.SecurityException, ValidationException, DecryptionException {
+    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.security.SecurityException, ValidationException, DecryptionException, URIException {
 
         // Verify storage time skew
         if (!isDateTimeSkewValid(getResponseSkew(), getMaxAssertionTime(), assertion.getIssueInstant())) {
@@ -323,7 +325,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @throws SAMLException       error validating the object
      * @throws DecryptionException in case the NameID can't be decrypted
      */
-    protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException {
+    protected void verifySubject(Subject subject, AuthnRequest request, SAMLMessageContext context) throws SAMLException, DecryptionException, URIException {
 
         for (SubjectConfirmation confirmation : subject.getSubjectConfirmations()) {
 
@@ -408,11 +410,11 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      * @param signature signature to verify
      * @param context   context
      * @throws SAMLException       signature missing although required
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws org.opensaml.security.SecurityException
      *                             signature can't be validated
      * @throws ValidationException signature is malformed
      */
-    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.xml.security.SecurityException, ValidationException {
+    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.security.SecurityException, ValidationException {
         SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
         if (signature != null) {

@@ -16,11 +16,12 @@
 package org.opensaml.saml2.binding.decoding;
 
 import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.saml.saml2.binding.decoding.impl.HTTPSOAP11Decoder;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.http.HttpClientInTransport;
 import org.opensaml.ws.transport.http.LocationAwareInTransport;
-import org.opensaml.xml.parse.ParserPool;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
 
 /**
  * Custom implementation of the decoder which takes into account user HTTPInput method

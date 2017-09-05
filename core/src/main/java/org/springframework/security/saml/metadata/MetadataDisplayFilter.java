@@ -14,7 +14,9 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntityDescriptor;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
+import javax.naming.spi.Resolver;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -116,7 +119,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
             response.setContentType("application/samlmetadata+xml"); // SAML_Meta, 4.1.1 - line 1235
             response.addHeader("Content-Disposition", "attachment; filename=\"spring_saml_metadata.xml\"");
             displayMetadata(entityId, response.getWriter());
-        } catch (MetadataProviderException e) {
+        } catch (ResolverException e) {
             throw new ServletException("Error initializing metadata", e);
         }
     }
@@ -139,7 +142,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
         } catch (MarshallingException e) {
             log.error("Error marshalling entity descriptor", e);
             throw new ServletException(e);
-        } catch (MetadataProviderException e) {
+        } catch (ResolverException e) {
             log.error("Error retrieving metadata", e);
             throw new ServletException("Error retrieving metadata", e);
         }

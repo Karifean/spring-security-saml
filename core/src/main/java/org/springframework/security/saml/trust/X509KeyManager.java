@@ -15,7 +15,7 @@
  */
 package org.springframework.security.saml.trust;
 
-import org.opensaml.xml.security.x509.X509Credential;
+import org.opensaml.security.x509.X509Credential;
 
 import java.net.Socket;
 import java.security.Principal;

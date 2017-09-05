@@ -16,9 +16,9 @@ package org.springframework.security.saml;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.impl.AssertionBuilder;
-import org.opensaml.saml2.core.impl.NameIDBuilder;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.impl.AssertionBuilder;
+import org.opensaml.saml.saml2.core.impl.NameIDBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.RedirectStrategy;
 

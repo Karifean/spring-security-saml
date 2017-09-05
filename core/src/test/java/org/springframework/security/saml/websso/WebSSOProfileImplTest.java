@@ -14,16 +14,18 @@
  */
 package org.springframework.security.saml.websso;
 
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.AuthnRequest;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.core.AuthnRequest;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
-import org.opensaml.xml.XMLObject;
+//import org.opensaml.xml.XMLObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.context.SAMLContextProvider;
@@ -41,6 +43,8 @@ import java.io.IOException;
 import static junit.framework.Assert.assertNull;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI;
+import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI;
 
 /**
  * @author Vladimir Schafer
@@ -117,7 +121,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = ResolverException.class)
     public void testMissingSP() throws Exception {
         MetadataManager manager = context.getBean("metadata", MetadataManager.class);
         while (manager.getProviders().size() > 0) {
@@ -186,8 +190,8 @@ public class WebSSOProfileImplTest {
         assertEquals("http://localhost:8081/spring-security-saml2-webapp", authnRequest.getIssuer().getValue());
         assertEquals("http://localhost:8081/spring-security-saml2-webapp/saml/SSO", authnRequest.getAssertionConsumerServiceURL());
         assertEquals("http://localhost:8080/opensso/SSORedirect/metaAlias/idp", authnRequest.getDestination());
-        assertEquals(org.opensaml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI, authnRequest.getProtocolBinding());
-        assertEquals(org.opensaml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI, samlContext.getPeerEntityEndpoint().getBinding());
+        assertEquals(SAML2_POST_BINDING_URI, authnRequest.getProtocolBinding());
+        assertEquals(SAML2_REDIRECT_BINDING_URI, samlContext.getPeerEntityEndpoint().getBinding());
         verifyMock();
 
     }
@@ -197,7 +201,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = ResolverException.class)
     public void testInvalidBinding() throws Exception {
         options.setBinding("invalid");
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
@@ -212,7 +216,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = ResolverException.class)
     public void testUnsupportedConsumerIndex() throws Exception {
         options.setAssertionConsumerIndex(2);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
@@ -226,7 +230,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = ResolverException.class)
     public void testInvalidConsumerIndex() throws Exception {
         options.setAssertionConsumerIndex(20);
         storage.storeMessage((String) notNull(), (XMLObject) notNull());
@@ -240,7 +244,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = ResolverException.class)
     public void testBindingUnsupportedByIDP() throws Exception {
         String idpId = "http://localhost:8080/noBinding";
         samlContext.setPeerEntityId(idpId);
@@ -278,7 +282,7 @@ public class WebSSOProfileImplTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MetadataProviderException.class)
+    @Test(expected = ResolverException.class)
     public void testNoAvailableBinding() throws Exception {
         String idpId = "http://localhost:8080/noBinding";
         samlContext.setPeerEntityId(idpId);

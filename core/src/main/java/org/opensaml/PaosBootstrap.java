@@ -16,14 +16,14 @@
 
 package org.opensaml;
 
-import org.opensaml.xml.ConfigurationException;
+// import org.opensaml.xml.ConfigurationException;
 
 public class PaosBootstrap extends DefaultBootstrap {
     
     /** XMLTooling configuration file for PAOS binding */
     private static String[] paosXmlToolingConfig = { "/liberty-paos-config.xml" };
     
-    public static synchronized void bootstrap() throws ConfigurationException {
+    public static synchronized void bootstrap() throws Exception {
         DefaultBootstrap.bootstrap();
         DefaultBootstrap.initializeXMLTooling(paosXmlToolingConfig);
     }

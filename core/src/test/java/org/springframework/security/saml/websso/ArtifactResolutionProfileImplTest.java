@@ -15,9 +15,12 @@
 package org.springframework.security.saml.websso;
 
 import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.URI;
+//import org.apache.commons.httpclient.HttpClient;
+//import org.apache.commons.httpclient.URI;
+import org.apache.http.client.HttpClient;
 import org.junit.Test;
+
+import java.net.URI;
 
 import static org.junit.Assert.*;
 

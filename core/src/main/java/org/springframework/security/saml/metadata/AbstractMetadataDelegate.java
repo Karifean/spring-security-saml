@@ -14,16 +14,16 @@
  */
 package org.springframework.security.saml.metadata;
 
-import org.opensaml.saml2.metadata.EntitiesDescriptor;
-import org.opensaml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.RoleDescriptor;
-import org.opensaml.saml2.metadata.provider.*;
-import org.opensaml.xml.XMLObject;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
+import org.opensaml.saml.saml2.metadata.EntityDescriptor;
 import org.springframework.util.Assert;
 
-import javax.xml.namespace.QName;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observer;
+
+//import org.opensaml.saml2.metadata.provider.*;
 
 /**
  * Class wraps an existing provider and delegates all method calls to it. Subclasses can thus add additional functionality
@@ -31,12 +31,12 @@ import java.util.List;
  *
  * @author Vladimir Schaefer
  */
-public abstract class AbstractMetadataDelegate implements ObservableMetadataProvider {
+public abstract class AbstractMetadataDelegate implements MetadataResolver /*  ObservableMetadataProvider */ {
 
     /**
      * Wrapped entity the calls are delegated to.
      */
-    private MetadataProvider delegate;
+    private MetadataResolver delegate;
 
     /**
      * Observers, loaded from the provider.
@@ -49,18 +49,21 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
      *
      * @param delegate delegate to use, can't be null
      */
-    public AbstractMetadataDelegate(MetadataProvider delegate) {
+    public AbstractMetadataDelegate(MetadataResolver delegate) {
         Assert.notNull(delegate, "Delegate can't be null");
         this.delegate = delegate;
+/*
         if (delegate instanceof ObservableMetadataProvider) {
             observers = ((ObservableMetadataProvider) delegate).getObservers();
         } else {
             observers = new LinkedList<Observer>();
         }
+*/
+        observers = new LinkedList<Observer>();
     }
 
-    public boolean requireValidMetadata() {
-        return delegate.requireValidMetadata();
+    public boolean isRequireValidMetadata() {
+        return delegate.isRequireValidMetadata();
     }
 
     public void setRequireValidMetadata(boolean requireValidMetadata) {
@@ -71,10 +74,11 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
         return delegate.getMetadataFilter();
     }
 
-    public void setMetadataFilter(MetadataFilter newFilter) throws MetadataProviderException {
+    public void setMetadataFilter(MetadataFilter newFilter) /* throws MetadataProviderException */ {
         delegate.setMetadataFilter(newFilter);
     }
 
+/*
     public XMLObject getMetadata() throws MetadataProviderException {
         return delegate.getMetadata();
     }
@@ -82,11 +86,13 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
     public EntitiesDescriptor getEntitiesDescriptor(String name) throws MetadataProviderException {
         return delegate.getEntitiesDescriptor(name);
     }
-
-    public EntityDescriptor getEntityDescriptor(String entityID) throws MetadataProviderException {
-        return delegate.getEntityDescriptor(entityID);
+*/
+    public EntityDescriptor getEntityDescriptor(String entityID) /* throws MetadataProviderException */ {
+//        return delegate.getEntityDescriptor(entityID);
+        throw new RuntimeException("TODO getEntityDescriptor");
     }
 
+/*
     public List<RoleDescriptor> getRole(String entityID, QName roleName) throws MetadataProviderException {
         return delegate.getRole(entityID, roleName);
     }
@@ -94,6 +100,7 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
     public RoleDescriptor getRole(String entityID, QName roleName, String supportedProtocol) throws MetadataProviderException {
         return delegate.getRole(entityID, roleName, supportedProtocol);
     }
+*/
 
     public List<Observer> getObservers() {
         return observers;
@@ -102,7 +109,7 @@ public abstract class AbstractMetadataDelegate implements ObservableMetadataProv
     /**
      * @return original object the calls are delegated to
      */
-    public MetadataProvider getDelegate() {
+    public MetadataResolver getDelegate() {
         return delegate;
     }
 

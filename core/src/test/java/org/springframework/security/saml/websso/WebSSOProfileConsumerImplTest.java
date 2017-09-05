@@ -17,12 +17,13 @@ package org.springframework.security.saml.websso;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.*;
-import org.opensaml.saml2.metadata.AssertionConsumerService;
-import org.opensaml.xml.XMLObjectBuilderFactory;
+//import org.opensaml.Configuration;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.saml2.core.*;
+import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -69,7 +70,7 @@ public class WebSSOProfileConsumerImplTest {
         processor = context.getBean("processor", SAMLProcessor.class);
         profile = new WebSSOProfileConsumerImpl(processor, manager);
         contextProvider = context.getBean("contextProvider", SAMLContextProvider.class);
-        builderFactory = Configuration.getBuilderFactory();
+        builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
         HttpServletRequest request = createMock(HttpServletRequest.class);
         SAMLTestHelper.setLocalContextParameters(request, "/", null);

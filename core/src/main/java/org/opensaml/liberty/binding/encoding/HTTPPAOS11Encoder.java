@@ -16,25 +16,27 @@
 
 package org.opensaml.liberty.binding.encoding;
 
-import org.opensaml.Configuration;
-import org.opensaml.common.SAMLObject;
-import org.opensaml.common.SAMLObjectBuilder;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+//import org.opensaml.Configuration;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLObject;
+import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.common.binding.SAMLMessageContext;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.binding.encoding.BaseSAML2MessageEncoder;
-import org.opensaml.saml2.binding.encoding.HTTPSOAP11Encoder;
-import org.opensaml.saml2.ecp.RelayState;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.binding.encoding.impl.BaseSAML2MessageEncoder;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPSOAP11Encoder;
+// import org.opensaml.saml2.ecp.RelayState;
+import org.opensaml.saml.saml2.ecp.RelayState;
 import org.opensaml.ws.message.MessageContext;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.ws.soap.common.SOAPObjectBuilder;
-import org.opensaml.ws.soap.soap11.Body;
-import org.opensaml.ws.soap.soap11.Envelope;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.soap.common.SOAPObjectBuilder;
+import org.opensaml.soap.soap11.Body;
+import org.opensaml.soap.soap11.Envelope;
 import org.opensaml.ws.soap.util.SOAPHelper;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.opensaml.ws.transport.http.HTTPTransportUtils;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -92,9 +94,9 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             HTTPTransportUtils.setUTF8Encoding(outTransport);
             HTTPTransportUtils.setContentType(outTransport, "text/xml");
             outTransport.setHeader("SOAPAction", "http://www.oasis-open.org/committees/security");
-            Writer out = new OutputStreamWriter(outTransport.getOutgoingStream(), "UTF-8");
-            XMLHelper.writeNode(envelopeElem, out);
-            out.flush();
+//            Writer out = new OutputStreamWriter(outTransport.getOutgoingStream(), "UTF-8");
+            SerializeSupport.writeNode(envelopeElem, outTransport.getOutgoingStream());
+//            out.flush();
         } catch (UnsupportedEncodingException e) {
             log.error("JVM does not support required UTF-8 encoding");
             throw new MessageEncodingException("JVM does not support required UTF-8 encoding");
@@ -119,7 +121,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             throw new IllegalArgumentException("Relay state can't exceed size 80 when using ECP profile");
         }
 
-        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
         SAMLObjectBuilder<RelayState> relayStateBuilder = (SAMLObjectBuilder<RelayState>) builderFactory.getBuilder(RelayState.DEFAULT_ELEMENT_NAME);
         RelayState relayState = relayStateBuilder.buildObject();
         relayState.setSOAP11Actor(RelayState.SOAP11_ACTOR_NEXT);
@@ -132,7 +134,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
     protected Envelope buildPAOSMessage(SAMLObject samlMessage, XMLObject outboundEnvelope) {
 
         Envelope envelope;
-        XMLObjectBuilderFactory builderFactory = Configuration.getBuilderFactory();
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
 
         if (outboundEnvelope != null && outboundEnvelope instanceof Envelope) {
             // We already have a complete envelope with specified headers that we want to keep.

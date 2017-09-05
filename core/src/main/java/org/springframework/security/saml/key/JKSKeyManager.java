@@ -14,13 +14,13 @@
  */
 package org.springframework.security.saml.key;
 
-import org.opensaml.common.SAMLRuntimeException;
-import org.opensaml.xml.security.CriteriaSet;
-import org.opensaml.xml.security.SecurityException;
-import org.opensaml.xml.security.credential.Credential;
-import org.opensaml.xml.security.credential.CredentialResolver;
-import org.opensaml.xml.security.credential.KeyStoreCredentialResolver;
-import org.opensaml.xml.security.criteria.EntityIDCriteria;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.core.criterion.EntityIdCriterion;
+import org.opensaml.saml.common.SAMLRuntimeException;
+import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
+import org.opensaml.security.credential.Credential;
+import org.opensaml.security.credential.CredentialResolver;
+import org.opensaml.security.credential.impl.KeyStoreCredentialResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -163,11 +163,11 @@ public class JKSKeyManager implements KeyManager {
         }
     }
 
-    public Iterable<Credential> resolve(CriteriaSet criteriaSet) throws org.opensaml.xml.security.SecurityException {
+    public Iterable<Credential> resolve(CriteriaSet criteriaSet) throws ResolverException {
         return credentialResolver.resolve(criteriaSet);
     }
 
-    public Credential resolveSingle(CriteriaSet criteriaSet) throws SecurityException {
+    public Credential resolveSingle(CriteriaSet criteriaSet) throws ResolverException{
         return credentialResolver.resolveSingle(criteriaSet);
     }
 
@@ -186,10 +186,14 @@ public class JKSKeyManager implements KeyManager {
 
         try {
             CriteriaSet cs = new CriteriaSet();
-            EntityIDCriteria criteria = new EntityIDCriteria(keyName);
+            EntityIdCriterion criteria = new EntityIdCriterion(keyName);
             cs.add(criteria);
             return resolveSingle(cs);
-        } catch (org.opensaml.xml.security.SecurityException e) {
+/*
+        } catch (org.opensaml.security.SecurityException e) {
+            throw new SAMLRuntimeException("Can't obtain SP signing key", e);
+*/
+        } catch (ResolverException e) {
             throw new SAMLRuntimeException("Can't obtain SP signing key", e);
         }
 

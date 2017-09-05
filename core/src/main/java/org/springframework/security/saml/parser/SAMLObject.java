@@ -14,10 +14,10 @@
  */
 package org.springframework.security.saml.parser;
 
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.util.XMLHelper;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.springframework.security.saml.util.SAMLUtil;
 
 import java.io.IOException;
@@ -61,7 +61,7 @@ public class SAMLObject<T extends XMLObject> extends SAMLBase<T, T> {
     private void writeObject(ObjectOutputStream out) throws IOException {
         try {
             if (serializedObject == null) {
-                serializedObject = XMLHelper.nodeToString(SAMLUtil.marshallMessage(getObject()));
+                serializedObject = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(getObject()));
             }
             out.writeUTF((String) serializedObject);
         } catch (MessageEncodingException e) {

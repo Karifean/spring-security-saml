@@ -15,11 +15,12 @@
 package org.springframework.security.saml.metadata;
 
 import junit.framework.Assert;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.saml2.metadata.provider.AbstractReloadingMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.metadata.resolver.impl.AbstractReloadingMetadataResolver;
+import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -171,12 +172,12 @@ public class MetadataManagerTest {
         refresher.schedule(new TimerTask() {
             @Override
             public void run() {
-                for (MetadataProvider metadataProvider : manager.getProviders()) {
+                for (MetadataResolver metadataProvider : manager.getProviders()) {
                     try {
                         AbstractMetadataDelegate delegate = (AbstractMetadataDelegate) metadataProvider;
-                        AbstractReloadingMetadataProvider prov = (AbstractReloadingMetadataProvider) delegate.getDelegate();
+                        AbstractReloadingMetadataResolver prov = (AbstractReloadingMetadataResolver) delegate.getDelegate();
                         prov.refresh();
-                    } catch (MetadataProviderException e) {
+                    } catch (ResolverException e) {
                         e.printStackTrace();
                     }
                 }
@@ -224,7 +225,7 @@ public class MetadataManagerTest {
     @Test
     public void testMetadataChanges() throws Exception {
 
-        MetadataProvider newProvider = context.getBean("singleProvider", MetadataProvider.class);
+        MetadataResolver newProvider = context.getBean("singleProvider", MetadataResolver.class);
         assertNull(manager.getEntityDescriptor("http://localhost:8080/noBinding"));
 
         manager.addMetadataProvider(newProvider);
@@ -318,7 +319,7 @@ public class MetadataManagerTest {
 
                 }
 
-            } catch (MetadataProviderException e) {
+            } catch (ResolverException e) {
                 failure = e;
                 throw new RuntimeException("Timer has failed", e);
             } catch (Throwable e) {

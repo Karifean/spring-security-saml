@@ -14,15 +14,16 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.metadata.Endpoint;
-import org.opensaml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
-import org.opensaml.ws.message.encoder.MessageEncoder;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.saml2.metadata.Endpoint;
+import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.decoder.MessageDecodingException;
+import org.opensaml.messaging.encoder.MessageEncoder;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.ws.security.SecurityPolicy;
 import org.opensaml.ws.security.provider.BasicSecurityPolicy;
 import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
@@ -80,12 +81,12 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param binding     to use for message extraction
      * @return SAML message context with filled information about the message
      * @throws SAMLException             error retrieving the message from the request
-     * @throws MetadataProviderException error retrieving metadata
+     * @throws ResolverException error retrieving metadata
      * @throws MessageDecodingException  error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws org.opensaml.security.SecurityException
      *                                   error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, SAMLBinding binding) throws SAMLException, ResolverException, MessageDecodingException, org.opensaml.security.SecurityException {
 
         log.debug("Retrieving message using binding {}", binding.getBindingURI());
 
@@ -138,16 +139,16 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param samlContext saml context
      * @param binding     to use for message extraction
      * @return SAML message context with filled information about the message
-     * @throws org.opensaml.common.SAMLException
+     * @throws SAMLException
      *          error retrieving the message from the request
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
+     * @throws ResolverException
      *          error retrieving metadat
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws MessageDecodingException
      *          error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *          error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, ResolverException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
 
         return retrieveMessage(samlContext, getBinding(binding));
 
@@ -158,16 +159,16 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      *
      * @param samlContext saml context
      * @return SAML message context with filled information about the message
-     * @throws org.opensaml.common.SAMLException
+     * @throws org.opensaml.saml.common.SAMLException
      *          error retrieving the message from the request
-     * @throws org.opensaml.saml2.metadata.provider.MetadataProviderException
+     * @throws ResolverException
      *          error retrieving metadat
-     * @throws org.opensaml.ws.message.decoder.MessageDecodingException
+     * @throws org.opensaml.messaging.decoder.MessageDecodingException
      *          error decoding the message
-     * @throws org.opensaml.xml.security.SecurityException
+     * @throws SecurityException
      *          error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext) throws SAMLException, MetadataProviderException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext) throws SAMLException, ResolverException, MessageDecodingException, SecurityException {
 
         return retrieveMessage(samlContext, getBinding(samlContext.getInboundMessageTransport()));
 
@@ -182,7 +183,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @return resulting context, might be a copy
      */
     public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign)
-            throws SAMLException, MetadataProviderException, MessageEncodingException {
+            throws SAMLException, ResolverException, MessageEncodingException {
 
         Endpoint endpoint = samlContext.getPeerEntityEndpoint();
         if (endpoint == null) {
@@ -193,7 +194,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
 
     }
 
-    public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, String bindingName) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, String bindingName) throws SAMLException, ResolverException, MessageEncodingException {
 
         return sendMessage(samlContext, sign, getBinding(bindingName));
 
@@ -209,9 +210,9 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @return context
      * @throws SAMLException             in case message can't be sent
      * @throws MessageEncodingException  in case message encoding fails
-     * @throws MetadataProviderException in case metadata for required entities is not found
+     * @throws ResolverException in case metadata for required entities is not found
      */
-    protected SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, SAMLBinding binding) throws SAMLException, MetadataProviderException, MessageEncodingException {
+    protected SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign, SAMLBinding binding) throws SAMLException, ResolverException, MessageEncodingException {
 
         verifyContext(samlContext);
 
@@ -231,9 +232,9 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * Verifies that context contains all the required information related to the local entity.
      *
      * @param samlContext context to populate
-     * @throws MetadataProviderException in case metadata do not contain expected entities
+     * @throws ResolverException in case metadata do not contain expected entities
      */
-    protected void verifyContext(SAMLMessageContext samlContext) throws MetadataProviderException {
+    protected void verifyContext(SAMLMessageContext samlContext) throws ResolverException {
 
         Assert.notNull(samlContext.getMetadataProvider(), "Metadata provider must be set in the context");
         Assert.notNull(samlContext.getLocalEntityId(), "Local entity id must be set in the context");
@@ -274,10 +275,10 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @param endpoint endpoint t
      * @return binding
      * @throws SAMLException in case binding can't be found
-     * @throws MetadataProviderException in case binding of the endpoint can't be determined
+     * @throws ResolverException in case binding of the endpoint can't be determined
      * @see SAMLUtil#getBindingForEndpoint(org.opensaml.saml2.metadata.Endpoint)
      */
-    protected SAMLBinding getBinding(Endpoint endpoint) throws SAMLException, MetadataProviderException {
+    protected SAMLBinding getBinding(Endpoint endpoint) throws SAMLException, ResolverException {
         return getBinding(SAMLUtil.getBindingForEndpoint(endpoint));
     }
 

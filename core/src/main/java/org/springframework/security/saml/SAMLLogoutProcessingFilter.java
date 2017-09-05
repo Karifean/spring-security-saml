@@ -14,12 +14,13 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.common.SAMLException;
-import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.LogoutResponse;
-import org.opensaml.saml2.core.StatusCode;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.ws.message.decoder.MessageDecodingException;
+import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.saml.common.SAMLException;
+import org.opensaml.saml.saml2.core.LogoutRequest;
+import org.opensaml.saml.saml2.core.LogoutResponse;
+import org.opensaml.saml.saml2.core.StatusCode;
+//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,13 +135,13 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
             } catch (SAMLException e) {
                 logger.debug("Incoming SAML message is invalid", e);
                 throw new ServletException("Incoming SAML message is invalid", e);
-            } catch (MetadataProviderException e) {
+            } catch (ResolverException e) {
                 logger.debug("Error determining metadata contracts", e);
                 throw new ServletException("Error determining metadata contracts", e);
             } catch (MessageDecodingException e) {
                 logger.debug("Error decoding incoming SAML message", e);
                 throw new ServletException("Error decoding incoming SAML message", e);
-            } catch (org.opensaml.xml.security.SecurityException e) {
+            } catch (org.opensaml.security.SecurityException e) {
                 logger.debug("Incoming SAML message failed security validation", e);
                 throw new ServletException("Incoming SAML message failed security validation", e);
             }
@@ -191,7 +192,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                         }
                     }
 
-                    logoutProfile.sendLogoutResponse(context, StatusCode.SUCCESS_URI, null);
+                    logoutProfile.sendLogoutResponse(context, StatusCode.SUCCESS, null);
                     samlLogger.log(SAMLConstants.LOGOUT_REQUEST, SAMLConstants.SUCCESS, context);
 
                 } catch (Exception e) {

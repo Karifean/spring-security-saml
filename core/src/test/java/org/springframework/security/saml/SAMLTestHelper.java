@@ -14,10 +14,12 @@
  */
 package org.springframework.security.saml;
 
-import org.opensaml.Configuration;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.XMLObjectBuilderFactory;
+//import org.opensaml.Configuration;
+//import org.opensaml.DefaultBootstrap;
+import org.opensaml.core.config.InitializationException;
+import org.opensaml.core.config.InitializationService;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -67,11 +69,12 @@ public class SAMLTestHelper {
     public static XMLObjectBuilderFactory getBuilderFactory() {
         if (builderFactory == null) {
             try {
-                DefaultBootstrap.bootstrap();
-            } catch (ConfigurationException e) {
+                InitializationService.initialize();
+//                DefaultBootstrap.bootstrap();
+            } catch (InitializationException e) {
                 throw new RuntimeException("Error creating builder factory");
             }
-            builderFactory = Configuration.getBuilderFactory();
+            builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
         }
         return builderFactory;
     }

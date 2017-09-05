@@ -19,8 +19,8 @@ import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
+import org.opensaml.security.credential.Credential;
 import org.opensaml.ws.transport.http.httpclient.OutputStreamRequestEntity;
-import org.opensaml.xml.security.credential.Credential;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;

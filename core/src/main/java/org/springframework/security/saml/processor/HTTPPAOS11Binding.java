@@ -15,14 +15,14 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.liberty.binding.decoding.HTTPPAOS11Decoder;
 import org.opensaml.liberty.binding.encoding.HTTPPAOS11Encoder;
-import org.opensaml.ws.message.decoder.MessageDecoder;
-import org.opensaml.ws.message.encoder.MessageEncoder;
+import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.ws.transport.InTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.xml.parse.ParserPool;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
 
 import javax.servlet.http.HttpServletRequest;
 

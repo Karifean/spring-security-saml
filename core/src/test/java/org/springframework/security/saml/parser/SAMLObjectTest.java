@@ -14,18 +14,19 @@
  */
 package org.springframework.security.saml.parser;
 
+import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensaml.common.SAMLObjectBuilder;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.impl.ActionImpl;
-import org.opensaml.ws.message.encoder.MessageEncodingException;
-import org.opensaml.xml.Configuration;
-import org.opensaml.xml.io.Marshaller;
-import org.opensaml.xml.io.MarshallingException;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallingException;
-import org.opensaml.xml.parse.ParserPool;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.saml.common.SAMLObjectBuilder;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.impl.ActionImpl;
+import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.core.xml.io.Marshaller;
+import org.opensaml.core.xml.io.MarshallingException;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.springframework.security.saml.SAMLTestHelper;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.w3c.dom.Element;
@@ -114,12 +115,12 @@ public class SAMLObjectTest {
      *
      * @throws Exception error
      */
-    @Test(expected = MessageEncodingException.class)
+    @Test(expected = ConstraintViolationException.class)
     public void testMarshallObjectWithoutMarshaller() throws Exception {
         TestObject to = new TestObject("xxx", "", "");
         SAMLObject<TestObject> tso = new SAMLObject<TestObject>(to);
 
-        Configuration.getMarshallerFactory().deregisterMarshaller(to.getElementQName());
+        XMLObjectProviderRegistrySupport.getMarshallerFactory().deregisterMarshaller(to.getElementQName());
         SAMLUtil.marshallMessage(to);
     }
 
@@ -128,13 +129,13 @@ public class SAMLObjectTest {
      *
      * @throws Exception error
      */
-    @Test(expected = IOException.class)
+    @Test(expected = ConstraintViolationException.class)
     public void testMarshallingError() throws Exception {
         TestObject to = new TestObject("xxx", "", "");
         SAMLObject<TestObject> tso = new SAMLObject<TestObject>(to);
 
         Marshaller mock = createMock(Marshaller.class);
-        Configuration.getMarshallerFactory().registerMarshaller(to.getElementQName(), mock);
+        XMLObjectProviderRegistrySupport.getMarshallerFactory().registerMarshaller(to.getElementQName(), mock);
 
         expect(mock.marshall(to)).andThrow(new MarshallingException("Error"));
 
@@ -160,14 +161,14 @@ public class SAMLObjectTest {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outStream.toByteArray());
         ObjectInputStream input = new ObjectInputStream(inputStream);
 
-        Unmarshaller old = Configuration.getUnmarshallerFactory().getUnmarshaller(assertion.getElementQName());
+        Unmarshaller old = XMLObjectProviderRegistrySupport.getUnmarshallerFactory().getUnmarshaller(assertion.getElementQName());
 
         try {
-            Configuration.getUnmarshallerFactory().deregisterUnmarshaller(assertion.getElementQName());
+            XMLObjectProviderRegistrySupport.getUnmarshallerFactory().deregisterUnmarshaller(assertion.getElementQName());
             SAMLBase o = (SAMLBase) input.readObject();
             o.getObject();
         } finally {
-            Configuration.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), old);
+            XMLObjectProviderRegistrySupport.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), old);
         }
 
     }
@@ -194,8 +195,8 @@ public class SAMLObjectTest {
         ObjectInputStream input = new ObjectInputStream(inputStream);
 
         Unmarshaller mock = createMock(Unmarshaller.class);
-        Unmarshaller old = Configuration.getUnmarshallerFactory().getUnmarshaller(assertion.getElementQName());
-        Configuration.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), mock);
+        Unmarshaller old = XMLObjectProviderRegistrySupport.getUnmarshallerFactory().getUnmarshaller(assertion.getElementQName());
+        XMLObjectProviderRegistrySupport.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), mock);
 
         expect(mock.unmarshall((Element) notNull())).andThrow(new UnmarshallingException(""));
 
@@ -205,7 +206,7 @@ public class SAMLObjectTest {
             o.getObject();
             verify(mock);
         } finally {
-            Configuration.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), old);
+            XMLObjectProviderRegistrySupport.getUnmarshallerFactory().registerUnmarshaller(assertion.getElementQName(), old);
         }
     }
 

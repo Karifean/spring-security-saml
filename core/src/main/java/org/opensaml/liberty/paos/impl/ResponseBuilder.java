@@ -16,9 +16,9 @@
 
 package org.opensaml.liberty.paos.impl;
 
-import org.opensaml.common.impl.AbstractSAMLObjectBuilder;
-import org.opensaml.common.xml.SAMLConstants;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.liberty.paos.Response;
+import org.opensaml.saml.common.AbstractSAMLObjectBuilder;
 
 public class ResponseBuilder extends AbstractSAMLObjectBuilder<Response> {
     

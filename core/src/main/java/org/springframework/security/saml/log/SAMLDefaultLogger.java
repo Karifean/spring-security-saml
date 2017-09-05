@@ -15,9 +15,9 @@
  */
 package org.springframework.security.saml.log;
 
-import org.opensaml.ws.message.encoder.MessageEncodingException;
+import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -104,11 +104,11 @@ public class SAMLDefaultLogger implements SAMLLogger {
         if (logMessages) {
             try {
                 if (context.getInboundSAMLMessage() != null) {
-                    String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
+                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
                     sb.append(messageStr);
                 }
                 if (context.getOutboundSAMLMessage() != null) {
-                    String messageStr = XMLHelper.nodeToString(SAMLUtil.marshallMessage(context.getOutboundSAMLMessage()));
+                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(context.getOutboundSAMLMessage()));
                     sb.append(messageStr);
                 }
             } catch (MessageEncodingException e1) {
