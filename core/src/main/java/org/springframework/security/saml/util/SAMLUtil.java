@@ -19,6 +19,9 @@ import net.shibboleth.utilities.java.support.net.URIException;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.joda.time.DateTime;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.saml.common.SAMLException;
@@ -53,10 +56,12 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.w3c.dom.Element;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -521,20 +526,46 @@ public class SAMLUtil {
     public static HostnameVerifier getHostnameVerifier(String hostnameVerificationType) {
 
         HostnameVerifier hostnameVerifier;
+
         if ("default".equalsIgnoreCase(hostnameVerificationType)) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
+            hostnameVerifier = new DefaultHostnameVerifier();
         } else if ("defaultAndLocalhost".equalsIgnoreCase(hostnameVerificationType)) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST;
+            hostnameVerifier = new DefaultAndLocalhostHostnameVerifier();
         } else if ("strict".equalsIgnoreCase(hostnameVerificationType)) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.STRICT;
+            hostnameVerifier = new StrictHostnameVerifier(); //TODO
         } else if ("allowAll".equalsIgnoreCase(hostnameVerificationType)) {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.ALLOW_ALL;
+            hostnameVerifier = new NoopHostnameVerifier();
         } else {
-            hostnameVerifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT;
+            hostnameVerifier = new DefaultHostnameVerifier();
         }
 
         return hostnameVerifier;
 
+    }
+
+    private static final class DefaultAndLocalhostHostnameVerifier implements HostnameVerifier {
+
+        @Override
+        public boolean verify(String s, SSLSession sslSession) {
+            if (isLocalhost(s)) {
+                return true;
+            }
+            return new DefaultHostnameVerifier().verify(s, sslSession);
+        }
+
+        private static final String[] LOCALHOSTS = {"::1", "127.0.0.1", "localhost", "localhost.localdomain"};
+
+        private static boolean isLocalhost(String host) {
+            host = host != null ? host.trim().toLowerCase() : "";
+            if (host.startsWith("::1")) {
+                int x = host.lastIndexOf('%');
+                if (x >= 0) {
+                    host = host.substring(0, x);
+                }
+            }
+            int x = Arrays.binarySearch(LOCALHOSTS, host);
+            return x >= 0;
+        }
     }
 
     /**

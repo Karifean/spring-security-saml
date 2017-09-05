@@ -16,7 +16,7 @@
 package org.springframework.security.saml.context;
 
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
-import org.apache.commons.ssl.HostnameVerifier;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.saml.metadata.MetadataManager;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -78,7 +79,7 @@ public class SAMLContextProviderImplTest {
         SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
         assertEquals(metadata.getHostedSPName(), context.getLocalEntityId());
         assertEquals(SPSSODescriptor.DEFAULT_ELEMENT_NAME, context.getLocalEntityRole());
-        assertEquals(context.getLocalSSLHostnameVerifier(), HostnameVerifier.DEFAULT);
+        assertEquals(context.getLocalSSLHostnameVerifier(), new DefaultHostnameVerifier());
         verifyMock();
     }
 

@@ -14,6 +14,7 @@
  */
 package org.springframework.security.saml;
 
+import net.shibboleth.utilities.java.support.net.URIException;
 import org.joda.time.DateTime;
 import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.SAMLRuntimeException;
@@ -112,6 +113,10 @@ public class SAMLAuthenticationProvider implements AuthenticationProvider, Initi
             log.debug("Error decrypting SAML message", e);
             samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
             throw new AuthenticationServiceException("Error decrypting SAML message", e);
+        } catch (URIException e) {
+            log.debug("Error interpreting URI", e);
+            samlLogger.log(SAMLConstants.AUTH_N_RESPONSE, SAMLConstants.FAILURE, context, e);
+            throw new AuthenticationServiceException("Error interpreting URI", e);
         }
 
         Object userDetails = getUserDetails(credential);
