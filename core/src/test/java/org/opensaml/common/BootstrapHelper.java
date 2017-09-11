@@ -30,8 +30,12 @@ public class BootstrapHelper /* extends DefaultBootstrap */ {
     
     /** {@inheritDoc} */
     public static synchronized void bootstrap() {
-        PaosBootstrap.bootstrap();
-        
+        try {
+            PaosBootstrap.bootstrap();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 //        initializeXMLTooling(testConfigs);
     }
 

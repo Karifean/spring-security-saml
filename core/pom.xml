@@ -60,12 +60,13 @@
   <properties>
     <spring-framework.version>3.2.4.RELEASE</spring-framework.version>
     <spring-security.version>3.1.4.RELEASE</spring-security.version>
+    <opensaml.version>3.1.0</opensaml.version>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-core</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -89,7 +90,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-messaging-api</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -114,7 +115,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-saml-api</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -138,7 +139,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-storage-api</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -162,7 +163,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-xmlsec-api</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -186,7 +187,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-security-api</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -210,7 +211,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-security-impl</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -234,7 +235,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-saml-api</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -258,7 +259,7 @@
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-saml-impl</artifactId>
-      <version>3.1.1</version>
+      <version>${opensaml.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
