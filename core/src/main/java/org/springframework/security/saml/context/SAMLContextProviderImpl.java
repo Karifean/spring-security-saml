@@ -185,7 +185,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             throw new ResolverException("Peer entity ID wasn't specified, but is requested");
         }
 
-        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(peerEntityId.getBytes());
+        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(peerEntityId);
         RoleDescriptor roleDescriptor = metadata.getRole(peerEntityId, peerEntityRole, SAMLConstants.SAML20P_NS);
         ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(peerEntityId);
 
@@ -312,7 +312,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             throw new ResolverException("No hosted service provider is configured and no alias was selected");
         }
 
-        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(localEntityId.getBytes());
+        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(localEntityId);
         RoleDescriptor roleDescriptor = metadata.getRole(localEntityId, localEntityRole, SAMLConstants.SAML20P_NS);
         ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(localEntityId);
 

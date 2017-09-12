@@ -133,7 +133,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      */
     protected void displayMetadata(String spEntityName, PrintWriter writer) throws ServletException {
         try {
-            EntityDescriptor descriptor = manager.getEntityDescriptor(spEntityName.getBytes());
+            EntityDescriptor descriptor = manager.getEntityDescriptor(spEntityName);
             if (descriptor == null) {
                 throw new ServletException("Metadata entity with ID " + manager.getHostedSPName() + " wasn't found");
             } else {

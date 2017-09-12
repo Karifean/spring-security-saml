@@ -235,7 +235,7 @@ public class SAMLUtil {
         try {
 
             MessageDigest sha1Digester = MessageDigest.getInstance("SHA-1");
-            byte[] hashedEntityId = sha1Digester.digest(entityId.getBytes());
+            byte[] hashedEntityId = sha1Digester.digest(entityId);
 
             for (int i = 0; i < hashedEntityId.length; i++) {
                 if (hashedEntityId[i] != hashID[i]) {

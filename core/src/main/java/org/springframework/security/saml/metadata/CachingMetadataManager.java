@@ -207,7 +207,7 @@ public class CachingMetadataManager extends MetadataManager {
 
     private final ValueLoader<EntityDescriptor, String> entityLoader = new ValueLoader<EntityDescriptor, String>() {
         public EntityDescriptor getValue(String identifier) throws ResolverException {
-            return CachingMetadataManager.super.getEntityDescriptor(identifier.getBytes());
+            return CachingMetadataManager.super.getEntityDescriptor(identifier);
         }
     };
 

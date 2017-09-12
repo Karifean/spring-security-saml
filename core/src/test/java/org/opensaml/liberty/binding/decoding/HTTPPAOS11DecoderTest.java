@@ -80,7 +80,7 @@ public class HTTPPAOS11DecoderTest extends BaseTestCase {
                 "</samlp:Status></samlp:Response>" + 
             "</soap11:Body></soap11:Envelope>";
             
-        httpRequest.setContent(soapMessage.getBytes());
+        httpRequest.setContent(soapMessage);
     
         decoder.decode(messageContext);
         
