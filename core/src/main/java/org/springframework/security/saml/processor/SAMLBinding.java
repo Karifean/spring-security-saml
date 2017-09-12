@@ -17,8 +17,6 @@ package org.springframework.security.saml.processor;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.ws.security.SecurityPolicyRule;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.OutTransport;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +33,7 @@ public interface SAMLBinding {
     /**
      * Checks whether current binding can be used to extract SAML message from the request.
      *
-     * @param transport verify whether this binding supports given transport mechanism
+     * @param request verify whether this binding supports given transport mechanism
      * @return true if this binding can be used to parse SAML message
      */
     boolean supports(HttpServletRequest request);
@@ -43,7 +41,7 @@ public interface SAMLBinding {
     /**
      * Checks whether current binding can be used to send a message using given transport.
      *
-     * @param transport verify whether this binding supports given transport mechanism
+     * @param response verify whether this binding supports given transport mechanism
      * @return true if this binding can be used to send message over the transport
      */
     boolean supports(HttpServletResponse response);
