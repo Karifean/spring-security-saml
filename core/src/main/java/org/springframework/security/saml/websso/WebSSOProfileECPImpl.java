@@ -30,7 +30,6 @@ import org.opensaml.soap.common.SOAPObjectBuilder;
 import org.opensaml.soap.messaging.context.SOAP11Context;
 import org.opensaml.soap.soap11.Envelope;
 //import org.opensaml.ws.soap.util.SOAPHelper;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
@@ -74,8 +73,8 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
         sendMessage(context, spDescriptor.isAuthnRequestsSigned(), SAMLConstants.SAML2_PAOS_BINDING_URI);
         
-        HTTPOutTransport outTransport = (HTTPOutTransport) context.getOutboundMessageTransport();
-        outTransport.setHeader("Content-Type", "application/vnd.paos+xml");
+
+        context.getResponse().setHeader("Content-Type", "application/vnd.paos+xml");
 
         SAMLMessageStorage messageStorage = context.getMessageStorage();
         if (messageStorage != null) {
