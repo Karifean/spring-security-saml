@@ -31,6 +31,7 @@ import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -59,18 +60,12 @@ public class HTTPSOAP11Binding extends SAMLBindingImpl {
         super(decoder, encoder);
     }
 
-    public boolean supports(InTransport transport) {
-        if (transport instanceof HttpServletRequestAdapter) {
-            HttpServletRequestAdapter t = (HttpServletRequestAdapter) transport;
-            HttpServletRequest request = t.getWrappedRequest();
-            return "POST".equalsIgnoreCase(t.getHTTPMethod()) && request.getContentType() != null && request.getContentType().startsWith("text/xml");
-        } else {
-            return false;
-        }
+    public boolean supports(HttpServletRequest request) {
+        return "POST".equalsIgnoreCase(request.getMethod()) && request.getContentType() != null && request.getContentType().startsWith("text/xml");
     }
 
-    public boolean supports(OutTransport transport) {
-        return transport instanceof HTTPOutTransport;
+    public boolean supports(HttpServletResponse response) {
+        return true;
     }
 
     public String getBindingURI() {

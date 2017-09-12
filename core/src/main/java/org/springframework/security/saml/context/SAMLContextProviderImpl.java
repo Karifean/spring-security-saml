@@ -202,15 +202,12 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     protected void populateGenericContext(HttpServletRequest request, HttpServletResponse response, SAMLMessageContext context) throws ResolverException {
 
-        HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(request);
-        HttpServletResponseAdapter outTransport = new HttpServletResponseAdapter(response, request.isSecure());
-
         // Store attribute which cannot be located from InTransport directly
         request.setAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_CONTEXT_PATH, request.getContextPath());
 
         context.setMetadataProvider(metadata);
-        context.setInboundMessageTransport(inTransport);
-        context.setOutboundMessageTransport(outTransport);
+        context.setRequest(request);
+        context.setResponse(response);
 
         context.setMessageStorage(storageFactory.getMessageStorage(request));
 
@@ -242,10 +239,9 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateLocalEntityId(SAMLMessageContext context, String requestURI) throws ResolverException {
 
         String entityId;
-        HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
 
         // Pre-configured entity Id
-        entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
+        entityId = (String) context.getRequest().getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
         if (entityId != null) {
             logger.debug("Using protocol specified SP {}", entityId);
             setLocalEntityId(context, entityId);
@@ -375,7 +371,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populatePeerSSLCredential(SAMLMessageContext samlContext) {
 
-        X509Certificate[] chain = (X509Certificate[]) samlContext.getInboundMessageTransport().getAttribute(ServletRequestX509CredentialAdapter.X509_CERT_REQUEST_ATTRIBUTE);
+        X509Certificate[] chain = (X509Certificate[]) samlContext.getRequest().getAttribute(ServletRequestX509CredentialAdapter.X509_CERT_REQUEST_ATTRIBUTE);
 
         if (chain != null && chain.length > 0) {
 

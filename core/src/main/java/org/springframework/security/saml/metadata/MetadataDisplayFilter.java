@@ -17,8 +17,6 @@ package org.springframework.security.saml.metadata;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityId;
 
 /**
  * The filter expects calls on configured URL and presents user with SAML2 metadata representing
@@ -115,7 +115,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
     protected void processMetadataDisplay(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             SAMLMessageContext context = contextProvider.getLocalEntity(request, response);
-            String entityId = context.getLocalEntityId();
+            String entityId = getLocalEntityId(context);
             response.setContentType("application/samlmetadata+xml"); // SAML_Meta, 4.1.1 - line 1235
             response.addHeader("Content-Disposition", "attachment; filename=\"spring_saml_metadata.xml\"");
             displayMetadata(entityId, response.getWriter());
@@ -133,7 +133,7 @@ public class MetadataDisplayFilter extends GenericFilterBean {
      */
     protected void displayMetadata(String spEntityName, PrintWriter writer) throws ServletException {
         try {
-            EntityDescriptor descriptor = manager.getEntityDescriptor(spEntityName);
+            EntityDescriptor descriptor = manager.getEntityDescriptor(spEntityName.getBytes());
             if (descriptor == null) {
                 throw new ServletException("Metadata entity with ID " + manager.getHostedSPName() + " wasn't found");
             } else {

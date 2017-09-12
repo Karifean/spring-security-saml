@@ -32,6 +32,8 @@ import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -76,17 +78,14 @@ public class HTTPPostBinding extends SAMLBindingImpl {
         this.parserPool = parserPool;
     }
 
-    public boolean supports(InTransport transport) {
-        if (transport instanceof HTTPInTransport) {
-            HTTPTransport t = (HTTPTransport) transport;
-            return "POST".equalsIgnoreCase(t.getHTTPMethod()) && (t.getParameterValue("SAMLRequest") != null || t.getParameterValue("SAMLResponse") != null);
-        } else {
-            return false;
-        }
+    public boolean supports(HttpServletRequest request) {
+        return "POST".equalsIgnoreCase(request.getMethod()) &&
+                (request.getParameter("SAMLRequest") != null ||
+                        request.getParameter("SAMLResponse") != null);
     }
 
-    public boolean supports(OutTransport transport) {
-        return transport instanceof HTTPOutTransport;
+    public boolean supports(HttpServletResponse response) {
+        return true;
     }
 
     public String getBindingURI() {

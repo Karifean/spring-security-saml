@@ -31,6 +31,8 @@ import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -61,17 +63,12 @@ public class HTTPArtifactBinding extends SAMLBindingImpl {
         super(decoder, encoder);
     }
 
-    public boolean supports(InTransport transport) {
-        if (transport instanceof HTTPInTransport) {
-            HTTPInTransport t = (HTTPInTransport) transport;
-            return t.getParameterValue("SAMLart") != null;
-        } else {
-            return false;
-        }
+    public boolean supports(HttpServletRequest request) {
+            return request.getParameter("SAMLart") != null;
     }
 
-    public boolean supports(OutTransport transport) {
-        return transport instanceof HTTPOutTransport;
+    public boolean supports(HttpServletResponse response) {
+        return true;
     }
 
     public String getBindingURI() {

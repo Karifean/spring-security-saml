@@ -3,6 +3,7 @@ package org.springframework.security.saml.util;
 
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.messaging.context.*;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.Endpoint;
@@ -137,12 +138,6 @@ public class SAMLMessageContextAdapter {
     /*static void setMetadataProvider(SAMLMessageContext context, MetadataProvider provider){
 
     }*/
-    /*static void setInboundMessageTransport(SAMLMessageContext context, inTransport){
-
-    }
-    static void setOutboundMessageTransport(SAMLMessageContext context, outTransport){
-
-    }*/
 
     public static String getInboundSAMLMessageId(SAMLMessageContext context) {
         return context.getSubcontext(SAMLMessageInfoContext.class).getMessageId();
@@ -181,4 +176,7 @@ public class SAMLMessageContextAdapter {
         context.getSubcontext(SAMLBindingContext.class, true).setRelayState(relayState);
     }
 
+    /*public static void setInboundSAMLProtocol(SAMLMessageContext context, String protocol) {
+        context.getSubcontext(SAMLProtocolContext.class).setProtocol(protocol);
+    }*/
 }
