@@ -19,6 +19,7 @@ package org.opensaml.liberty.binding.encoding;
 import net.shibboleth.utilities.java.support.xml.SerializeSupport;
 //import org.opensaml.Configuration;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
+import org.opensaml.messaging.context.MessageContext;
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.SAMLObjectBuilder;
 import org.opensaml.common.binding.SAMLMessageContext;
@@ -39,12 +40,18 @@ import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.util.SAMLMessageContextAdapter;
 import org.w3c.dom.Element;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+
+import static org.opensaml.saml.common.messaging.SAMLMessageSecuritySupport.signMessage;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getOutboundSAMLMessage;
 
 public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
 
@@ -61,23 +68,23 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
             throw new MessageEncodingException(
                     "Invalid message context type, this encoder only support SAMLMessageContext");
         }
-
-        if (!(messageContext.getOutboundMessageTransport() instanceof HTTPOutTransport)) {
+        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
+        if (!(samlMsgCtx.getResponse() instanceof HttpServletResponse)) {
             log.error("Invalid outbound message transport type, this encoder only support HTTPOutTransport");
             throw new MessageEncodingException(
                     "Invalid outbound message transport type, this encoder only support HTTPOutTransport");
         }
 
         // Contains the message body
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
-        SAMLObject samlMessage = samlMsgCtx.getOutboundSAMLMessage();
+
+        SAMLObject samlMessage = getOutboundSAMLMessage(samlMsgCtx.);
         if (samlMessage == null) {
             throw new MessageEncodingException("No outbound SAML message contained in message context");
         }
 
         // Add RelayState SOAP header if required
-        if (samlMsgCtx.getRelayState() != null) {
-            SOAPHelper.addHeaderBlock(samlMsgCtx, getRelayState(samlMsgCtx.getRelayState()));
+        if (SAMLMessageContextAdapter.getRelayState(samlMsgCtx) != null) {
+            SOAPHelper.addHeaderBlock(samlMsgCtx, getRelayState(SAMLMessageContextAdapter.getRelayState(samlMsgCtx)));
         }
 
         signMessage(samlMsgCtx);
