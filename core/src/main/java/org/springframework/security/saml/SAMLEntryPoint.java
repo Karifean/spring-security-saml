@@ -16,15 +16,10 @@ package org.springframework.security.saml;
 
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.saml.common.SAMLException;
-import org.opensaml.saml.common.SAMLRuntimeException;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
-//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import net.shibboleth.utilities.java.support.net.URLBuilder;
 import org.opensaml.messaging.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import net.shibboleth.utilities.java.support.collection.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -262,7 +257,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
                 discoveryUrl = samlDiscovery.getFilterProcessesUrl();
             }
 
-            String contextPath = (String) context.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
+            String contextPath = (String) context.getRequest().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
             discoveryURL = contextPath + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + getLocalEntityId(context);
 
             logger.debug("Using local discovery URL");
@@ -270,8 +265,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         }
 
         logger.debug("Redirecting to discovery URL {}", discoveryURL);
-        HTTPOutTransport response = (HTTPOutTransport) context.getOutboundMessageTransport();
-        response.sendRedirect(discoveryURL);
+        context.getResponse().sendRedirect(discoveryURL);
 
     }
 
@@ -332,7 +326,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @return true if ECP profile should get initialized
      */
     protected boolean isECP(SAMLMessageContext context) {
-        HttpServletRequest request = ((HttpServletRequestAdapter) context.getInboundMessageTransport()).getWrappedRequest();
+        HttpServletRequest request = context.getRequest();
         boolean ecp = context.getLocalExtendedMetadata().isEcpEnabled() && SAMLUtil.isECPRequest(request);
         if (ecp) {
             if (webSSOprofileECP == null) {
@@ -354,8 +348,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
      * @return true if this HttpRequest is a response from IDP discovery profile.
      */
     private boolean isDiscoResponse(SAMLMessageContext context) {
-        HTTPInTransport request = (HTTPInTransport) context.getInboundMessageTransport();
-        String disco = request.getParameterValue(DISCOVERY_RESPONSE_PARAMETER);
+        String disco = context.getRequest().getParameter(DISCOVERY_RESPONSE_PARAMETER);
         return (disco != null && disco.toLowerCase().trim().equals("true"));
     }
 

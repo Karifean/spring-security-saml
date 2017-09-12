@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
 import java.security.cert.CertificateEncodingException;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.setSubjectNameIdentifier;
+
 /**
  * Class implements processing of the SAML Holder-of-Key Browser SSO profile as per
  * http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-holder-of-key-browser-sso-cs-02.pdf.
@@ -141,7 +143,7 @@ public class WebSSOProfileConsumerHoKImpl extends WebSSOProfileConsumerImpl impl
                 } else {
                     nameID = subject.getNameID();
                 }
-                context.setSubjectNameIdentifier(nameID);
+                setSubjectNameIdentifier(context, nameID);
                 return;
 
             }

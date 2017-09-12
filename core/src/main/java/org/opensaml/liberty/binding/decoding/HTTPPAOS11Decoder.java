@@ -34,6 +34,8 @@ import org.opensaml.core.xml.XMLObject;
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.setRelayState;
+
 public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
 
     public HTTPPAOS11Decoder() {
@@ -72,7 +74,7 @@ public class HTTPPAOS11Decoder extends HTTPSOAP11Decoder {
         
         if (relayStateHeader.size() == 1
             && relayStateHeader.get(0) instanceof RelayStateImpl) {
-            samlMsgCtx.setRelayState(((RelayStateImpl) relayStateHeader.get(0)).getValue());
+            setRelayState(samlMsgCtx, ((RelayStateImpl) relayStateHeader.get(0)).getValue());
         }
     }
 

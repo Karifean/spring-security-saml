@@ -30,6 +30,8 @@ import org.opensaml.security.SecurityException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getRelayState;
+
 public class HTTPPAOS11DecoderTest extends BaseTestCase {
     
     private HTTPPAOS11Decoder decoder;
@@ -83,7 +85,7 @@ public class HTTPPAOS11DecoderTest extends BaseTestCase {
         decoder.decode(messageContext);
         
         assertEquals("The messageContext does not have the correct RelayState",
-                expectedRelayState, messageContext.getRelayState());        
+                expectedRelayState, getRelayState(messageContext));
     }
 
 }

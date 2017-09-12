@@ -3,6 +3,7 @@ package org.springframework.security.saml.util;
 
 import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.messaging.context.*;
+import org.opensaml.saml.saml2.core.NameID;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
@@ -162,6 +163,22 @@ public class SAMLMessageContextAdapter {
 
     public static QName getLocalEntityRole(SAMLMessageContext context){
         return context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate).getRole();
+    }
+
+    public static SAMLObject getSubjectNameIdentifier(SAMLMessageContext context) {
+        return context.getSubcontext(SAMLSubjectNameIdentifierContext.class, true).getSubjectNameIdentifier();
+    }
+
+    public static void setSubjectNameIdentifier(SAMLMessageContext context, NameID nameID) {
+        context.getSubcontext(SAMLSubjectNameIdentifierContext.class, true).setSubjectNameIdentifier(nameID);
+    }
+
+    public static String getRelayState(SAMLMessageContext context) {
+        return context.getSubcontext(SAMLBindingContext.class, true).getRelayState();
+    }
+
+    public static void setRelayState(SAMLMessageContext context, String relayState) {
+        context.getSubcontext(SAMLBindingContext.class, true).setRelayState(relayState);
     }
 
 }

@@ -251,7 +251,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             }
         }
 
-        NameID nameId = (NameID) context.getSubjectNameIdentifier();
+        NameID nameId = (NameID) getSubjectNameIdentifier(context);
         if (nameId == null) {
             throw new SAMLException("NameID element must be present as part of the Subject in the Response message, please enable it in the IDP configuration");
         }
@@ -266,7 +266,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         // Create the credential
-        return new SAMLCredential(nameId, subjectAssertion, getPeerEntityMetadata(context).getEntityID(), context.getRelayState(), attributes, getLocalEntityId(context), additionalData);
+        return new SAMLCredential(nameId, subjectAssertion, getPeerEntityMetadata(context).getEntityID(), getRelayState(context), attributes, getLocalEntityId(context), additionalData);
 
     }
 
@@ -394,7 +394,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
                 } else {
                     nameID = subject.getNameID();
                 }
-                context.setSubjectNameIdentifier(nameID);
+                setSubjectNameIdentifier(context, nameID);
                 return;
 
             }

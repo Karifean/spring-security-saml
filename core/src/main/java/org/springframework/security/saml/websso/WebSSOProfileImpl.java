@@ -101,7 +101,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 
         if (options.getRelayState() != null) {
-            context.setRelayState(options.getRelayState());
+            setRelayState(context, options.getRelayState());
         }
 
         boolean sign = spDescriptor.isAuthnRequestsSigned() || idpssoDescriptor.getWantAuthnRequestsSigned();

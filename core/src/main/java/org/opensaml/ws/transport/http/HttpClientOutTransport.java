@@ -15,7 +15,7 @@
  */
 package org.opensaml.ws.transport.http;
 
-import org.apache.commons.httpclient.HttpVersion;
+import org.apache.http.HttpVersion;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;

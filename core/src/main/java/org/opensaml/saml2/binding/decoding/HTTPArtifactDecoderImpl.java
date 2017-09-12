@@ -31,6 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getRelayState;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.setRelayState;
+
 /**
  * Class to decode HTTP artifact binding and request the SAML message through the artifact request
  * response protocol with an IDP. At the moment only supports GET requests.
@@ -90,9 +93,9 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         /*
          * Relay state parameter.
          */
-        samlMessageContext.setRelayState(inTransport.getParameterValue("RelayState"));
+        setRelayState(samlMessageContext, inTransport.getParameterValue("RelayState"));
 
-        log.debug("Decoded RelayState: {}", samlMessageContext.getRelayState());
+        log.debug("Decoded RelayState: {}", getRelayState(samlMessageContext));
 
         SAMLObject message = resolutionProfile.resolveArtifact(samlMessageContext, artifactId, getActualReceiverEndpointURI(samlMessageContext));
 

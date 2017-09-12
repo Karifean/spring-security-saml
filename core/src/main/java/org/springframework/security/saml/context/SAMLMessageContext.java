@@ -31,6 +31,8 @@ import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Message context with Spring Extension SAML module specific values.
@@ -38,6 +40,9 @@ import javax.net.ssl.HostnameVerifier;
  * @author Vladimir Schaefer
  */
 public class SAMLMessageContext<T> extends MessageContext<T> {
+
+    private HttpServletRequest request;
+    private HttpServletResponse response;
 
     private Decrypter localDecrypter;
     private Credential localSigningCredential;
@@ -247,23 +252,19 @@ public class SAMLMessageContext<T> extends MessageContext<T> {
         this.messageStorage = messageStorage;
     }
 
-    public SAMLObject getSubjectNameIdentifier() {
-        SAMLSubjectNameIdentifierContext SAMLSubjectNameIdentifierContext = getSubcontext(SAMLSubjectNameIdentifierContext.class, true);
-        return SAMLSubjectNameIdentifierContext.getSubjectNameIdentifier();
+    public HttpServletRequest getRequest() {
+        return request;
     }
 
-    public void setSubjectNameIdentifier(NameID nameID) {
-        SAMLSubjectNameIdentifierContext SAMLSubjectNameIdentifierContext = getSubcontext(SAMLSubjectNameIdentifierContext.class, true);
-         SAMLSubjectNameIdentifierContext.setSubjectNameIdentifier(nameID);
+    public void setRequest(HttpServletRequest request) {
+        this.request = request;
     }
 
-    public String getRelayState() {
-        SAMLBindingContext SAMLBindingContext = getSubcontext(SAMLBindingContext.class, true);
-        return SAMLBindingContext.getRelayState();
+    public HttpServletResponse getResponse() {
+        return response;
     }
 
-    public void setRelayState(String relayState) {
-        SAMLBindingContext SAMLBindingContext = getSubcontext(SAMLBindingContext.class, true);
-        SAMLBindingContext.setRelayState(relayState);
+    public void setResponse(HttpServletResponse response) {
+        this.response = response;
     }
 }

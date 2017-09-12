@@ -45,6 +45,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI;
 import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getRelayState;
 
 /**
  * @author Vladimir Schafer
@@ -342,7 +343,7 @@ public class WebSSOProfileImplTest {
         replyMock();
         profile.sendAuthenticationRequest(samlContext, options);
         verifyMock();
-        assertEquals("myRelayState", samlContext.getRelayState());
+        assertEquals("myRelayState", getRelayState(samlContext));
     }
 
     /**
