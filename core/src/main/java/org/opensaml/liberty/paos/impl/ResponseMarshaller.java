@@ -22,6 +22,8 @@ import org.opensaml.saml.common.AbstractSAMLObjectMarshaller;
 import org.opensaml.core.xml.XMLObject;
 import org.w3c.dom.Element;
 
+import static org.opensaml.core.xml.util.XMLObjectSupport.marshallAttribute;
+
 /**
  * Marshaller for instances of {@link Response}.
  */
@@ -38,11 +40,11 @@ public class ResponseMarshaller extends AbstractSAMLObjectMarshaller {
         }
         if (response.isSOAP11MustUnderstandXSBoolean() != null) {
             // AttributeSupport ?
-            XMLHelper.marshallAttribute(Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME, 
+            marshallAttribute(Response.SOAP11_MUST_UNDERSTAND_ATTR_NAME,
                     response.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
         }
         if (response.getSOAP11Actor() != null) {
-            XMLHelper.marshallAttribute(Response.SOAP11_ACTOR_ATTR_NAME, 
+            marshallAttribute(Response.SOAP11_ACTOR_ATTR_NAME,
                     response.getSOAP11Actor(), domElement, false);
         }
         

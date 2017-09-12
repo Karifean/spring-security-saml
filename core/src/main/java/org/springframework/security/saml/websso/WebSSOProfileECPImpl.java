@@ -24,12 +24,11 @@ import org.opensaml.saml.saml2.ecp.Request;
 import org.opensaml.saml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.saml2.metadata.SingleSignOnService;
-//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.soap.common.SOAPObjectBuilder;
 import org.opensaml.soap.messaging.context.SOAP11Context;
 import org.opensaml.soap.soap11.Envelope;
-//import org.opensaml.ws.soap.util.SOAPHelper;
+import org.opensaml.soap.util.SOAPSupport;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
@@ -68,8 +67,8 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         context.getSubcontext(SOAP11Context.class).setEnvelope(getEnvelope()); //added to replace statement above - make needed adjustments!
         setOutboundSAMLMessage(context, authRequest);
 
-        SOAPHelper.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
-        SOAPHelper.addHeaderBlock(context, getECPRequest(context, options));
+        SOAPSupport.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
+        SOAPSupport.addHeaderBlock(context, getECPRequest(context, options));
 
         sendMessage(context, spDescriptor.isAuthnRequestsSigned(), SAMLConstants.SAML2_PAOS_BINDING_URI);
         

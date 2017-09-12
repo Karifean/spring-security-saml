@@ -16,11 +16,14 @@
 
 package org.opensaml.liberty.paos.impl;
 
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.liberty.paos.Request;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.saml.common.AbstractSAMLObjectMarshaller;
 import org.w3c.dom.Element;
+
+import static org.opensaml.core.xml.util.XMLObjectSupport.marshallAttribute;
 
 /**
  * Marshaller for instances of {@link Request}.
@@ -44,11 +47,11 @@ public class RequestMarshaller extends AbstractSAMLObjectMarshaller {
                     request.getMessageID());
         }
         if (request.isSOAP11MustUnderstandXSBoolean() != null) {
-            XMLHelper.marshallAttribute(Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME,
+            marshallAttribute(Request.SOAP11_MUST_UNDERSTAND_ATTR_NAME,
                     request.isSOAP11MustUnderstandXSBoolean().toString(), domElement, false);
         }
         if (request.getSOAP11Actor() != null) {
-            XMLHelper.marshallAttribute(Request.SOAP11_ACTOR_ATTR_NAME, 
+            marshallAttribute(Request.SOAP11_ACTOR_ATTR_NAME,
                     request.getSOAP11Actor(), domElement, false);
         }
         

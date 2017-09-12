@@ -28,6 +28,7 @@ import org.opensaml.saml.saml2.binding.encoding.impl.BaseSAML2MessageEncoder;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPSOAP11Encoder;
 // import org.opensaml.saml2.ecp.RelayState;
 import org.opensaml.saml.saml2.ecp.RelayState;
+import org.opensaml.soap.util.SOAPSupport;
 import org.opensaml.ws.message.MessageContext;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.soap.common.SOAPObjectBuilder;
@@ -61,15 +62,15 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
     private final Logger log = LoggerFactory.getLogger(HTTPSOAP11Encoder.class);
 
     @Override
-    protected void doEncode(MessageContext messageContext) throws MessageEncodingException {
+    protected void doEncode() throws MessageEncodingException {
 
-        if (!(messageContext instanceof SAMLMessageContext)) {
+        if (!(getMessageContext() instanceof SAMLMessageContext)) {
             log.error("Invalid message context type, this encoder only support SAMLMessageContext");
             throw new MessageEncodingException(
                     "Invalid message context type, this encoder only support SAMLMessageContext");
         }
-        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) messageContext;
-        if (!(samlMsgCtx.getResponse() instanceof HttpServletResponse)) {
+        SAMLMessageContext samlMsgCtx = (SAMLMessageContext) getMessageContext();
+        if (samlMsgCtx.getResponse() == null) {
             log.error("Invalid outbound message transport type, this encoder only support HTTPOutTransport");
             throw new MessageEncodingException(
                     "Invalid outbound message transport type, this encoder only support HTTPOutTransport");
@@ -84,7 +85,7 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
 
         // Add RelayState SOAP header if required
         if (SAMLMessageContextAdapter.getRelayState(samlMsgCtx) != null) {
-            SOAPHelper.addHeaderBlock(samlMsgCtx, getRelayState(SAMLMessageContextAdapter.getRelayState(samlMsgCtx)));
+            SOAPSupport.addHeaderBlock(samlMsgCtx, getRelayState(SAMLMessageContextAdapter.getRelayState(samlMsgCtx)));
         }
 
         signMessage(samlMsgCtx);
@@ -96,13 +97,14 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
         Element envelopeElem = marshallMessage(envelope);
 
         try {
-            HTTPOutTransport outTransport = (HTTPOutTransport) messageContext.getOutboundMessageTransport();
-            HTTPTransportUtils.addNoCacheHeaders(outTransport);
-            HTTPTransportUtils.setUTF8Encoding(outTransport);
-            HTTPTransportUtils.setContentType(outTransport, "text/xml");
-            outTransport.setHeader("SOAPAction", "http://www.oasis-open.org/committees/security");
+            HttpServletResponse response = samlMsgCtx.getResponse();
+            response.setHeader("Cache-control", "no-cache, no-store");
+            response.setHeader("Pragma", "no-cache");
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/xml");
+            response.setHeader("SOAPAction", "http://www.oasis-open.org/committees/security");
 //            Writer out = new OutputStreamWriter(outTransport.getOutgoingStream(), "UTF-8");
-            SerializeSupport.writeNode(envelopeElem, outTransport.getOutgoingStream());
+            SerializeSupport.writeNode(envelopeElem, response.getOutputStream());
 //            out.flush();
         } catch (UnsupportedEncodingException e) {
             log.error("JVM does not support required UTF-8 encoding");
@@ -166,11 +168,21 @@ public class HTTPPAOS11Encoder extends BaseSAML2MessageEncoder {
     }
 
     public boolean providesMessageConfidentiality(MessageContext messageContext) throws MessageEncodingException {
-        return messageContext.getOutboundMessageTransport().isConfidential();
+        return contextIsSecure(messageContext);
     }
 
     public boolean providesMessageIntegrity(MessageContext messageContext) throws MessageEncodingException {
-        return messageContext.getOutboundMessageTransport().isIntegrityProtected();
+        return contextIsSecure(messageContext);
+    }
+
+    private boolean contextIsSecure(MessageContext messageContext) throws MessageEncodingException {
+        if (!(messageContext instanceof SAMLMessageContext)) {
+            log.error("Invalid message context type, this encoder only support SAMLMessageContext");
+            throw new MessageEncodingException(
+                    "Invalid message context type, this encoder only support SAMLMessageContext");
+        }
+        SAMLMessageContext context = (SAMLMessageContext) messageContext;
+        return context.getRequest().isSecure();
     }
 
 }

@@ -22,8 +22,6 @@ import org.opensaml.saml.common.SAMLObject;
 import org.opensaml.saml.common.xml.SAMLConstants;
 //import org.opensaml.ws.message.MessageContext;
 import org.opensaml.messaging.decoder.MessageDecodingException;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.ws.transport.http.HTTPOutTransport;
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 //import org.opensaml.xml.util.DatatypeHelper;
 import org.slf4j.Logger;
@@ -31,7 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static org.opensaml.saml.common.binding.SAMLBindingSupport.getActualReceiverEndpointURI;
 import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getRelayState;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.setInboundSAMLMessage;
 import static org.springframework.security.saml.util.SAMLMessageContextAdapter.setRelayState;
 
 /**
@@ -71,18 +74,18 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
 
         org.springframework.security.saml.context.SAMLMessageContext samlMessageContext = (org.springframework.security.saml.context.SAMLMessageContext) messageContext;
 
-        if (!(samlMessageContext.getInboundMessageTransport() instanceof HTTPInTransport)) {
+        /*if (!(samlMessageContext.getInboundMessageTransport() instanceof HTTPInTransport)) {
             log.error("Invalid inbound message transport type, this decoder only support HTTPInTransport");
             throw new MessageDecodingException("Invalid inbound message transport type, this decoder only support HTTPInTransport");
-        }
+        }*/
 
-        HTTPInTransport inTransport = (HTTPInTransport) samlMessageContext.getInboundMessageTransport();
-        HTTPOutTransport outTransport = (HTTPOutTransport) samlMessageContext.getOutboundMessageTransport();
+        HttpServletRequest request = samlMessageContext.getRequest();
+        HttpServletResponse response = samlMessageContext.getResponse();
 
         /*
          * Artifact parameter.
          */
-        String artifactId = StringSupport.trimOrNull(inTransport.getParameterValue("SAMLart"));
+        String artifactId = StringSupport.trimOrNull(request.getParameter("SAMLart"));
         if (artifactId == null) {
             log.error("SAMLart parameter was missing or did not contain a value.");
             throw new MessageDecodingException("SAMLArt parameter was missing or did not contain a value.");
@@ -93,16 +96,16 @@ public class HTTPArtifactDecoderImpl extends BaseSAML2MessageDecoder {
         /*
          * Relay state parameter.
          */
-        setRelayState(samlMessageContext, inTransport.getParameterValue("RelayState"));
+        setRelayState(samlMessageContext, request.getParameter("RelayState"));
 
         log.debug("Decoded RelayState: {}", getRelayState(samlMessageContext));
 
-        SAMLObject message = resolutionProfile.resolveArtifact(samlMessageContext, artifactId, getActualReceiverEndpointURI(samlMessageContext));
+        SAMLObject message = resolutionProfile.resolveArtifact(samlMessageContext, artifactId, getActualReceiverEndpointURI(samlMessageContext, request));
 
         // Fix potentially overwritten transports and set constants
-        samlMessageContext.setInboundSAMLMessage(message);
-        samlMessageContext.setInboundMessageTransport(inTransport);
-        samlMessageContext.setOutboundMessageTransport(outTransport);
+        setInboundSAMLMessage(samlMessageContext, message);
+        samlMessageContext.setRequest(request);
+        samlMessageContext.setResponse(response);
         samlMessageContext.setInboundSAMLBinding(SAMLConstants.SAML2_ARTIFACT_BINDING_URI);
 
         populateMessageContext(samlMessageContext);
