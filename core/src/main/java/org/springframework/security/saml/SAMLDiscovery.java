@@ -329,7 +329,7 @@ public class SAMLDiscovery extends GenericFilterBean {
                 filterUrl = samlEntryPoint.getFilterProcessesUrl();
             }
 
-            String contextPath = (String) messageContext.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
+            String contextPath = (String) messageContext.getRequest().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
             String responseURL = contextPath + filterUrl + (extendedMetadata.getAlias() != null ? "/alias/" + extendedMetadata.getAlias() : "") + "?" + SAMLEntryPoint.DISCOVERY_RESPONSE_PARAMETER + "=true";
 
             logger.debug("Using IDP Discovery response URL calculated for local entity {}", responseURL);
