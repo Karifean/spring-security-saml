@@ -19,15 +19,10 @@ import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
-//import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.messaging.encoder.MessageEncodingException;
-import org.opensaml.ws.security.SecurityPolicy;
-import org.opensaml.ws.security.provider.BasicSecurityPolicy;
-import org.opensaml.ws.security.provider.StaticSecurityPolicyResolver;
-import org.opensaml.ws.transport.InTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -35,6 +30,7 @@ import org.springframework.security.saml.metadata.MetadataManager;
 import org.springframework.security.saml.util.SAMLUtil;
 import org.springframework.util.Assert;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.Collection;
@@ -95,7 +91,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         verifyContext(samlContext);
         populateSecurityPolicy(samlContext, binding);
 
-        QName peerEntityRole = samlContext.getPeerEntityRole();
+        QName peerEntityRole = getPeerEntityRole(samlContext);
         if (peerEntityRole == null) {
             peerEntityRole = IDPSSODescriptor.DEFAULT_ELEMENT_NAME;
         }
@@ -172,7 +168,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      */
     public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext) throws SAMLException, ResolverException, MessageDecodingException, SecurityException {
 
-        return retrieveMessage(samlContext, getBinding(samlContext.getInboundMessageTransport()));
+        return retrieveMessage(samlContext, getBinding(samlContext.getRequest()));
 
     }
 
@@ -187,7 +183,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
     public SAMLMessageContext sendMessage(SAMLMessageContext samlContext, boolean sign)
             throws SAMLException, ResolverException, MessageEncodingException {
 
-        Endpoint endpoint = samlContext.getPeerEntityEndpoint();
+        Endpoint endpoint = getPeerEntityEndpoint(samlContext);
         if (endpoint == null) {
             throw new SAMLException("Could not get peer entity endpoint");
         }
@@ -239,10 +235,10 @@ public class SAMLProcessorImpl implements SAMLProcessor {
     protected void verifyContext(SAMLMessageContext samlContext) throws ResolverException {
 
         Assert.notNull(samlContext.getMetadataProvider(), "Metadata provider must be set in the context");
-        Assert.notNull(samlContext.getLocalEntityId(), "Local entity id must be set in the context");
-        Assert.notNull(samlContext.getLocalEntityRole(), "Local entity role must be set in the context");
-        Assert.notNull(samlContext.getLocalEntityMetadata(), "Local entity metadata must be set in the context");
-        Assert.notNull(samlContext.getLocalEntityRoleMetadata(), "Local entity role metadata must be set in the context");
+        Assert.notNull(getLocalEntityId(samlContext), "Local entity id must be set in the context");
+        Assert.notNull(getLocalEntityRole(samlContext), "Local entity role must be set in the context");
+        Assert.notNull(getLocalEntityMetadata(samlContext), "Local entity metadata must be set in the context");
+        Assert.notNull(getLocalEntityRoleMetadata(samlContext), "Local entity role metadata must be set in the context");
         Assert.notNull(samlContext.getLocalExtendedMetadata(), "Local extended metadata must be set in the context");
         Assert.notNull(samlContext.getLocalTrustEngine(), "SignatureTrustEngine must be set in the samlContext");
         Assert.notNull(samlContext.getLocalSSLTrustEngine(), "SSL Trust Engine must be set in the samlContext");
@@ -253,14 +249,14 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * Analyzes the transport object and returns the first binding capable of sending/extracting a SAML message from to/from it.
      * In case no binding is found SAMLException is thrown.
      *
-     * @param transport transport type to get binding for
+     * @param request transport type to get binding for
      * @return decoder
      * @throws SAMLException in case no suitable decoder is found for given request
      */
-    protected SAMLBinding getBinding(InTransport transport) throws SAMLException {
+    protected SAMLBinding getBinding(HttpServletRequest request) throws SAMLException {
 
         for (SAMLBinding binding : bindings) {
-            if (binding.supports(transport)) {
+            if (binding.supports(request)) {
                 return binding;
             }
         }
@@ -278,7 +274,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @return binding
      * @throws SAMLException in case binding can't be found
      * @throws ResolverException in case binding of the endpoint can't be determined
-     * @see SAMLUtil#getBindingForEndpoint(org.opensaml.saml2.metadata.Endpoint)
+     * @see SAMLUtil#getBindingForEndpoint(Endpoint)
      */
     protected SAMLBinding getBinding(Endpoint endpoint) throws SAMLException, ResolverException {
         return getBinding(SAMLUtil.getBindingForEndpoint(endpoint));

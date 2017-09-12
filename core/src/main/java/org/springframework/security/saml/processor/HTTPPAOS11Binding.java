@@ -20,8 +20,6 @@ import org.opensaml.liberty.binding.decoding.HTTPPAOS11Decoder;
 import org.opensaml.liberty.binding.encoding.HTTPPAOS11Encoder;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,16 +35,10 @@ public class HTTPPAOS11Binding extends HTTPSOAP11Binding {
     }
 
     @Override
-    public boolean supports(InTransport transport) {
-	    if (transport instanceof HttpServletRequestAdapter) {
-	        HttpServletRequestAdapter t = (HttpServletRequestAdapter) transport;
-	        HttpServletRequest request = t.getWrappedRequest();
-	        return "POST".equalsIgnoreCase(t.getHTTPMethod())
-                && request.getContentType().startsWith(
-                        org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER);
-	    } else {
-	        return false;
-	    }
+	public boolean supports(HttpServletRequest request) {
+		return "POST".equalsIgnoreCase(request.getMethod())
+			&& request.getContentType().startsWith(
+					org.springframework.security.saml.SAMLConstants.PAOS_HTTP_ACCEPT_HEADER);
     }
 
     @Override
