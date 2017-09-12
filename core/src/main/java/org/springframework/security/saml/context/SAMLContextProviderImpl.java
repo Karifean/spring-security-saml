@@ -147,14 +147,14 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populatePeerEntityId(SAMLMessageContext context) throws ResolverException {
 
-        HTTPInTransport inTransport = (HTTPInTransport) context.getInboundMessageTransport();
+        HttpServletRequest request = context.getRequest();
         String entityId;
 
-        entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID);
+        entityId = (String) request.getAttribute(org.springframework.security.saml.SAMLConstants.PEER_ENTITY_ID);
         if (entityId != null) { // Pre-configured entity Id
             logger.debug("Using protocol specified IDP {}", entityId);
         } else {
-            entityId = inTransport.getParameterValue(SAMLEntryPoint.IDP_PARAMETER);
+            entityId = request.getParameter(SAMLEntryPoint.IDP_PARAMETER);
             if (entityId != null) { // IDP from request
                 logger.debug("Using user specified IDP {} from request", entityId);
                 context.setPeerUserSelected(true);

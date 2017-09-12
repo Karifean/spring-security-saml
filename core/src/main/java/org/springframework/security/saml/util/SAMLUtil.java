@@ -346,13 +346,12 @@ public class SAMLUtil {
      *
      * @param endpoints      endpoints to check
      * @param messageBinding binding
-     * @param inTransport      transport which received the current message
+     * @param httpRequest      request
      * @param <T>            type of the endpoint
      * @return first endpoint satisfying the requestURL and binding conditions
      * @throws SAMLException in case endpoint can't be found
      */
-    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, InTransport inTransport) throws SAMLException, URIException {
-        HttpServletRequest httpRequest = ((HttpServletRequestAdapter)inTransport).getWrappedRequest();
+    public static <T extends Endpoint> T getEndpoint(List<T> endpoints, String messageBinding, HttpServletRequest httpRequest) throws SAMLException, URIException {
         String requestURL = StringSupport.trimOrNull(httpRequest.getRequestURL().toString());
         for (T endpoint : endpoints) {
             String binding = getBindingForEndpoint(endpoint);
