@@ -52,6 +52,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityId;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityRoleMetadata;
+
 /**
  * Class initializes SAML WebSSO Profile, IDP Discovery or ECP Profile from the SP side. Configuration
  * of the local service provider and incoming request determines which profile will get invoked.
@@ -208,7 +211,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
         WebSSOProfileOptions options = getProfileOptions(context, e);
 
         // Determine the assertionConsumerService to be used
-        AssertionConsumerService consumerService = SAMLUtil.getConsumerService((SPSSODescriptor) context.getLocalEntityRoleMetadata(), options.getAssertionConsumerIndex());
+        AssertionConsumerService consumerService = SAMLUtil.getConsumerService((SPSSODescriptor) getLocalEntityRoleMetadata(context), options.getAssertionConsumerIndex());
 
         // HoK WebSSO
         if (SAMLConstants.SAML2_HOK_WEBSSO_PROFILE_URI.equals(consumerService.getBinding())) {
@@ -246,7 +249,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
 
             URLBuilder urlBuilder = new URLBuilder(discoveryURL);
             List<Pair<String, String>> queryParams = urlBuilder.getQueryParams();
-            queryParams.add(new Pair<String, String>(SAMLDiscovery.ENTITY_ID_PARAM, context.getLocalEntityId()));
+            queryParams.add(new Pair<String, String>(SAMLDiscovery.ENTITY_ID_PARAM, getLocalEntityId(context)));
             queryParams.add(new Pair<String, String>(SAMLDiscovery.RETURN_ID_PARAM, IDP_PARAMETER));
             discoveryURL = urlBuilder.buildURL();
 
@@ -260,7 +263,7 @@ public class SAMLEntryPoint extends GenericFilterBean implements AuthenticationE
             }
 
             String contextPath = (String) context.getInboundMessageTransport().getAttribute(SAMLConstants.LOCAL_CONTEXT_PATH);
-            discoveryURL = contextPath + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + context.getLocalEntityId();
+            discoveryURL = contextPath + discoveryUrl + "?" + SAMLDiscovery.RETURN_ID_PARAM + "=" + IDP_PARAMETER + "&" + SAMLDiscovery.ENTITY_ID_PARAM + "=" + getLocalEntityId(context);
 
             logger.debug("Using local discovery URL");
 

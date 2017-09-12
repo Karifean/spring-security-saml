@@ -39,6 +39,8 @@ import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
+
 /**
  * Processor is capable of parsing SAML message from HttpServletRequest and populate the SAMLMessageContext
  * for further validations.
@@ -97,7 +99,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         if (peerEntityRole == null) {
             peerEntityRole = IDPSSODescriptor.DEFAULT_ELEMENT_NAME;
         }
-        samlContext.setPeerEntityRole(peerEntityRole);
+        setPeerEntityRole(samlContext, peerEntityRole);
         samlContext.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
         samlContext.setInboundSAMLBinding(binding.getBindingURI());
 
@@ -105,12 +107,12 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         MessageDecoder decoder = binding.getMessageDecoder();
         decoder.decode(samlContext);
 
-        if (samlContext.getPeerEntityMetadata() == null) {
+        if (getPeerEntityMetadata(samlContext) == null) {
             throw new MetadataProviderException("Metadata for issuer " + samlContext.getInboundMessageIssuer() + " wasn't found");
         }
 
-        samlContext.setPeerEntityId(samlContext.getPeerEntityMetadata().getEntityID());
-        samlContext.setPeerExtendedMetadata(((MetadataManager) samlContext.getMetadataProvider()).getExtendedMetadata(samlContext.getPeerEntityId()));
+        setPeerEntityId(samlContext, getPeerEntityMetadata(samlContext).getEntityID());
+        samlContext.setPeerExtendedMetadata(((MetadataManager) samlContext.getMetadataProvider()).getExtendedMetadata(getPeerEntityId(samlContext)));
 
         return samlContext;
 
@@ -148,7 +150,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
      * @throws SecurityException
      *          error verifying message
      */
-    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, ResolverException, MessageDecodingException, org.opensaml.xml.security.SecurityException {
+    public SAMLMessageContext retrieveMessage(SAMLMessageContext samlContext, String binding) throws SAMLException, ResolverException, MessageDecodingException, org.opensaml.security.SecurityException {
 
         return retrieveMessage(samlContext, getBinding(binding));
 

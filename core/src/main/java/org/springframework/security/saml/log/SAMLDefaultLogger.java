@@ -29,6 +29,8 @@ import org.springframework.security.saml.util.SAMLUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
+
 /**
  * Default Logger implementation sending message logs into standard Log4J logger.
  *
@@ -74,14 +76,14 @@ public class SAMLDefaultLogger implements SAMLLogger {
 
         // Log local entity ID
         sb.append(";");
-        if (context.getLocalEntityId() != null) {
-            sb.append(context.getLocalEntityId());
+        if (getLocalEntityId(context) != null) {
+            sb.append(getLocalEntityId(context));
         }
 
         // Log peer entity ID
         sb.append(";");
-        if (context.getPeerEntityId() != null) {
-            sb.append(context.getPeerEntityId());
+        if (getPeerEntityId(context) != null) {
+            sb.append(getPeerEntityId(context));
         }
 
         // Log NameID or principal when available
@@ -103,12 +105,12 @@ public class SAMLDefaultLogger implements SAMLLogger {
         sb.append(";");
         if (logMessages) {
             try {
-                if (context.getInboundSAMLMessage() != null) {
-                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
+                if (getInboundSAMLMessage(context) != null) {
+                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(getInboundSAMLMessage(context)));
                     sb.append(messageStr);
                 }
-                if (context.getOutboundSAMLMessage() != null) {
-                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(context.getOutboundSAMLMessage()));
+                if (getOutboundSAMLMessage(context) != null) {
+                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(getOutboundSAMLMessage(context)));
                     sb.append(messageStr);
                 }
             } catch (MessageEncodingException e1) {

@@ -48,6 +48,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getInboundSAMLMessage;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityRoleMetadata;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getPeerEntityId;
+
 /**
  * Filter processes arriving SAML Single Logout messages by delegating to the LogoutProfile.
  *
@@ -130,7 +134,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 context = contextProvider.getLocalEntity(request, response);
                 context.setCommunicationProfileId(getProfileName());
                 processor.retrieveMessage(context);
-                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
+                context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(getLocalEntityRoleMetadata(context).getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
 
             } catch (SAMLException e) {
                 logger.debug("Incoming SAML message is invalid", e);
@@ -146,13 +150,13 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                 throw new ServletException("Incoming SAML message failed security validation", e);
             }
 
-            if (context.getInboundSAMLMessage() instanceof LogoutResponse) {
+            if (getInboundSAMLMessage(context) instanceof LogoutResponse) {
 
                 try {
 
                     logoutProfile.processLogoutResponse(context);
 
-                    log.debug("Performing local logout after receiving logout response from {}", context.getPeerEntityId());
+                    log.debug("Performing local logout after receiving logout response from {}", getPeerEntityId(context));
                     super.doFilter(request, response, chain);
 
                     samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.SUCCESS, context);
@@ -162,7 +166,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                     samlLogger.log(SAMLConstants.LOGOUT_RESPONSE, SAMLConstants.FAILURE, context, e);
                 }
 
-            } else if (context.getInboundSAMLMessage() instanceof LogoutRequest) {
+            } else if (.getInboundSAMLMessage(context) instanceof LogoutRequest) {
 
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 SAMLCredential credential = null;
@@ -186,7 +190,7 @@ public class SAMLLogoutProcessingFilter extends LogoutFilter {
                     }
 
                     if (doLogout) {
-                        log.debug("Performing local logout after receiving logout request from {}", context.getPeerEntityId());
+                        log.debug("Performing local logout after receiving logout request from {}", getPeerEntityId(context));
                         for (LogoutHandler handler : handlers) {
                             handler.logout(request, response, auth);
                         }

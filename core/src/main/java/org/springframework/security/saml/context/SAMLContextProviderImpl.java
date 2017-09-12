@@ -68,6 +68,8 @@ import javax.xml.namespace.QName;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
+
 /**
  * Class is responsible for parsing HttpRequest/Response and determining which local entity (IDP/SP) is responsible
  * for its handling.
@@ -163,8 +165,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             }
         }
 
-        context.setPeerEntityId(entityId);
-        context.setPeerEntityRole(IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
+        setPeerEntityId(context, entityId);
+        setPeerEntityRole(context, IDPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
     }
 
@@ -176,14 +178,14 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populatePeerContext(SAMLMessageContext samlContext) throws ResolverException {
 
-        String peerEntityId = samlContext.getPeerEntityId();
-        QName peerEntityRole = samlContext.getPeerEntityRole();
+        String peerEntityId = getPeerEntityId(samlContext);
+        QName peerEntityRole = getPeerEntityRole(samlContext);
 
         if (peerEntityId == null) {
             throw new ResolverException("Peer entity ID wasn't specified, but is requested");
         }
 
-        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(peerEntityId);
+        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(peerEntityId.getBytes());
         RoleDescriptor roleDescriptor = metadata.getRole(peerEntityId, peerEntityRole, SAMLConstants.SAML20P_NS);
         ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(peerEntityId);
 
@@ -191,8 +193,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             throw new ResolverException("Metadata for entity " + peerEntityId + " and role " + peerEntityRole + " wasn't found");
         }
 
-        samlContext.setPeerEntityMetadata(entityDescriptor);
-        samlContext.setPeerEntityRoleMetadata(roleDescriptor);
+        setPeerEntityMetadata(samlContext, entityDescriptor);
+        setPeerEntityRoleMetadata(samlContext, roleDescriptor);
         samlContext.setPeerExtendedMetadata(extendedMetadata);
 
 
@@ -246,8 +248,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         entityId = (String) inTransport.getAttribute(org.springframework.security.saml.SAMLConstants.LOCAL_ENTITY_ID);
         if (entityId != null) {
             logger.debug("Using protocol specified SP {}", entityId);
-            context.setLocalEntityId(entityId);
-            context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            setLocalEntityId(context, entityId);
+            setLocalEntityRole(context, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
             return;
         }
 
@@ -284,13 +286,13 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
                 logger.debug("Using SP {} specified in request with alias {}", entityId, localAlias);
             }
 
-            context.setLocalEntityId(entityId);
-            context.setLocalEntityRole(localEntityRole);
+            setLocalEntityId(context, entityId);
+            setLocalEntityRole(context, localEntityRole);
 
         } else { // Defaults
 
-            context.setLocalEntityId(metadata.getHostedSPName());
-            context.setLocalEntityRole(SPSSODescriptor.DEFAULT_ELEMENT_NAME);
+            setLocalEntityId(context, metadata.getHostedSPName());
+            setLocalEntityRole(context, SPSSODescriptor.DEFAULT_ELEMENT_NAME);
 
         }
 
@@ -307,14 +309,14 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
      */
     protected void populateLocalEntity(SAMLMessageContext samlContext) throws ResolverException {
 
-        String localEntityId = samlContext.getLocalEntityId();
-        QName localEntityRole = samlContext.getLocalEntityRole();
+        String localEntityId = getLocalEntityId(samlContext);
+        QName localEntityRole = getLocalEntityRole(samlContext);
 
         if (localEntityId == null) {
             throw new ResolverException("No hosted service provider is configured and no alias was selected");
         }
 
-        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(localEntityId);
+        EntityDescriptor entityDescriptor = metadata.getEntityDescriptor(localEntityId.getBytes());
         RoleDescriptor roleDescriptor = metadata.getRole(localEntityId, localEntityRole, SAMLConstants.SAML20P_NS);
         ExtendedMetadata extendedMetadata = metadata.getExtendedMetadata(localEntityId);
 
@@ -322,8 +324,8 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
             throw new ResolverException("Metadata for entity " + localEntityId + " and role " + localEntityRole + " wasn't found");
         }
 
-        samlContext.setLocalEntityMetadata(entityDescriptor);
-        samlContext.setLocalEntityRoleMetadata(roleDescriptor);
+        setLocalEntityMetadata(samlContext, entityDescriptor);
+        setLocalEntityRoleMetadata(samlContext, roleDescriptor);
         samlContext.setLocalExtendedMetadata(extendedMetadata);
 
         if (extendedMetadata.getSigningKey() != null) {

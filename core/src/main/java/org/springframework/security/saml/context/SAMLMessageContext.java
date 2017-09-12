@@ -37,7 +37,7 @@ import javax.net.ssl.HostnameVerifier;
  *
  * @author Vladimir Schaefer
  */
-public class SAMLMessageContext extends MessageContext {
+public class SAMLMessageContext<T> extends MessageContext<T> {
 
     private Decrypter localDecrypter;
     private Credential localSigningCredential;

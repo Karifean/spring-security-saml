@@ -30,6 +30,8 @@ import org.opensaml.security.x509.impl.StaticPKIXValidationInformationResolver;
 import org.opensaml.xml.Configuration;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.security.x509.*;
+import org.opensaml.xmlsec.keyinfo.impl.BasicProviderKeyInfoCredentialResolver;
+import org.opensaml.xmlsec.keyinfo.impl.KeyInfoProvider;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.opensaml.xmlsec.signature.support.impl.PKIXSignatureTrustEngine;
 import org.slf4j.Logger;
@@ -239,7 +241,7 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
             spName = new HashSet<String>();
             aliasSet = new HashSet<String>();
 
-            List<MetadataResolver> resolvers = new ArrayList<>();
+            List<MetadataResolver> resolvers = new ArrayList<MetadataResolver>();
             for (ExtendedMetadataDelegate provider : availableProviders) {
 
                 try {
@@ -606,7 +608,9 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
         } else {
 
             log.debug("Trust verification skipped for metadata provider {}", provider);
-            return new AllowAllSignatureTrustEngine(Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+
+            return new AllowAllSignatureTrustEngine(new BasicProviderKeyInfoCredentialResolver(new ArrayList<KeyInfoProvider>()));
+            //return new AllowAllSignatureTrustEngine(Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
 
         }
 

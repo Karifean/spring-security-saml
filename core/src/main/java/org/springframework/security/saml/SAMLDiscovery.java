@@ -45,6 +45,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityRoleMetadata;
+
 /**
  * Filter implements Identity Provider Discovery Service and Profile as defined in
  * http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-idp-discovery.pdf.
@@ -200,7 +202,7 @@ public class SAMLDiscovery extends GenericFilterBean {
 
         // Cannot determine the return URL
         if (returnURL == null) {
-            throw new ServletException(new SAMLException("Can't determine IDP Discovery return URL for entity " + messageContext.getLocalEntityRoleMetadata().getID()));
+            throw new ServletException(new SAMLException("Can't determine IDP Discovery return URL for entity " + getLocalEntityRoleMetadata(messageContext).getID()));
         }
 
         // Policy to be used, MAY be present, only default "single" policy is supported
@@ -299,7 +301,7 @@ public class SAMLDiscovery extends GenericFilterBean {
      */
     protected String getDefaultReturnURL(SAMLMessageContext messageContext) {
 
-        RoleDescriptor descriptor = messageContext.getLocalEntityRoleMetadata();
+        RoleDescriptor descriptor = getLocalEntityRoleMetadata(messageContext);
         ExtendedMetadata extendedMetadata = messageContext.getLocalExtendedMetadata();
 
         // Response address from extended metadata

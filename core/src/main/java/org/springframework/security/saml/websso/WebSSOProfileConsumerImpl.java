@@ -25,6 +25,7 @@ import org.opensaml.core.xml.XMLObject;
 import org.opensaml.xmlsec.encryption.support.DecryptionException;
 import org.opensaml.xmlsec.signature.Signature;
 //import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
 import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
 
 /**
@@ -96,7 +98,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
     public SAMLCredential processAuthenticationResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.security.SecurityException, ValidationException, DecryptionException, URIException {
 
         AuthnRequest request = null;
-        SAMLObject message = context.getInboundSAMLMessage();
+        SAMLObject message = getInboundSAMLMessage(context);
 
         // Verify type
         if (!(message instanceof Response)) {
@@ -116,10 +118,10 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         // Verify signature of the response if present, unless already verified in binding
-        if (response.getSignature() != null && !context.isInboundSAMLMessageAuthenticated()) {
+        if (response.getSignature() != null && !isInboundSAMLMessageAuthenticated(context)) {
             log.debug("Verifying Response signature");
-            verifySignature(response.getSignature(), context.getPeerEntityId(), context.getLocalTrustEngine());
-            context.setInboundSAMLMessageAuthenticated(true);
+            verifySignature(response.getSignature(), getPeerEntityId(context), context.getLocalTrustEngine());
+            setInboundSAMLMessageAuthenticated(context,true);
         }
 
         // Verify issue time
@@ -264,7 +266,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         }
 
         // Create the credential
-        return new SAMLCredential(nameId, subjectAssertion, context.getPeerEntityMetadata().getEntityID(), context.getRelayState(), attributes, context.getLocalEntityId(), additionalData);
+        return new SAMLCredential(nameId, subjectAssertion, getPeerEntityMetadata(context).getEntityID(), context.getRelayState(), attributes, getLocalEntityId(context), additionalData);
 
     }
 
@@ -281,7 +283,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
         return null;
     }
 
-    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.security.SecurityException, ValidationException, DecryptionException, URIException {
+    protected void verifyAssertion(Assertion assertion, AuthnRequest request, SAMLMessageContext context) throws AuthenticationException, SAMLException, org.opensaml.security.SecurityException, ValidationException, DecryptionException, URIException, SignatureException {
 
         // Verify storage time skew
         if (!isDateTimeSkewValid(getResponseSkew(), getMaxAssertionTime(), assertion.getIssueInstant())) {
@@ -414,13 +416,13 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
      *                             signature can't be validated
      * @throws ValidationException signature is malformed
      */
-    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.security.SecurityException, ValidationException {
-        SPSSODescriptor roleMetadata = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+    protected void verifyAssertionSignature(Signature signature, SAMLMessageContext context) throws SAMLException, org.opensaml.security.SecurityException, ValidationException, SignatureException {
+        SPSSODescriptor roleMetadata = (SPSSODescriptor) getLocalEntityRoleMetadata(context);
         boolean wantSigned = roleMetadata.getWantAssertionsSigned();
         if (signature != null) {
-            verifySignature(signature, context.getPeerEntityMetadata().getEntityID(), context.getLocalTrustEngine());
+            verifySignature(signature, getPeerEntityMetadata(context).getEntityID(), context.getLocalTrustEngine());
         } else if (wantSigned) {
-            if (!context.isInboundSAMLMessageAuthenticated()) {
+            if (!isInboundSAMLMessageAuthenticated(context)) {
                 throw new SAMLException("Metadata includes wantAssertionSigned, but neither Response nor included Assertion is signed");
             }
         }
@@ -501,7 +503,7 @@ public class WebSSOProfileConsumerImpl extends AbstractProfileBase implements We
             }
             for (Audience aud : rest.getAudiences()) {
                 // Multiple Audiences within one AudienceRestriction form a logical "OR" (saml-core, 922-925)
-                if (context.getLocalEntityId().equals(aud.getAudienceURI())) {
+                if (getLocalEntityId(context).equals(aud.getAudienceURI())) {
                     continue audience;
                 }
             }

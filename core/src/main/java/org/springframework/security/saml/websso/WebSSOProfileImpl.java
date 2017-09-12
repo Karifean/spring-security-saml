@@ -37,6 +37,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
+
 /**
  * Class implements WebSSO profile and offers capabilities for SP initialized SSO and
  * process Response coming from IDP or IDP initialized SSO. HTTP-POST and HTTP-Redirect
@@ -72,13 +74,13 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
     public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options) throws SAMLException, ResolverException, MessageEncodingException {
 
         // Verify we deal with a local SP
-        if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(context.getLocalEntityRole())) {
-            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + context.getLocalEntityRole());
+        if (!SPSSODescriptor.DEFAULT_ELEMENT_NAME.equals(getLocalEntityRole(context))) {
+            throw new SAMLException("WebSSO can only be initialized for local SP, but localEntityRole is: " + getLocalEntityRole(context));
         }
 
         // Load the entities from the context
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
-        IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) context.getPeerEntityRoleMetadata();
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) getLocalEntityRoleMetadata(context);
+        IDPSSODescriptor idpssoDescriptor = (IDPSSODescriptor) getPeerEntityRoleMetadata(context);
         ExtendedMetadata idpExtendedMetadata = context.getPeerExtendedMetadata();
 
         if (spDescriptor == null || idpssoDescriptor == null || idpExtendedMetadata == null) {
@@ -92,10 +94,10 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         // TODO optionally implement support for conditions, subject
 
         context.setCommunicationProfileId(getProfileIdentifier());
-        context.setOutboundMessage(authRequest);
-        context.setOutboundSAMLMessage(authRequest);
-        context.setPeerEntityEndpoint(ssoService);
-        context.setPeerEntityRoleMetadata(idpssoDescriptor);
+        setOutboundMessage(context, authRequest);
+        setOutboundSAMLMessage(context, authRequest);
+        setPeerEntityEndpoint(context, ssoService);
+        setPeerEntityRoleMetadata(context, idpssoDescriptor);
         context.setPeerExtendedMetadata(idpExtendedMetadata);
 
         if (options.getRelayState() != null) {
@@ -258,7 +260,7 @@ public class WebSSOProfileImpl extends AbstractProfileBase implements WebSSOProf
         request.setProviderName(options.getProviderName());
         request.setVersion(SAMLVersion.VERSION_20);
 
-        buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
+        buildCommonAttributes(getLocalEntityId(context), request, bindingService);
 
         buildScoping(request, bindingService, options);
         builNameIDPolicy(request, options);

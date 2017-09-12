@@ -27,6 +27,8 @@ import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.criterion.EntityRoleCriterion;
+import org.opensaml.saml.criterion.ProtocolCriterion;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.criteria.UsageCriterion;
@@ -53,6 +55,9 @@ import org.springframework.security.saml.trust.X509KeyManager;
 import org.springframework.security.saml.trust.X509TrustManager;
 
 import java.net.URI;
+
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getPeerEntityEndpoint;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getPeerEntityId;
 
 /**
  * Implementation of the artifact resolution protocol which uses Apache HTTPClient for SOAP binding transport.
@@ -89,7 +94,7 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
 
         try {
 
-            URI uri = new URI(context.getPeerEntityEndpoint().getLocation(), true, "UTF-8");
+            URI uri = new URI(getPeerEntityEndpoint(context).getLocation(), true, "UTF-8");
 //            postMethod = new PostMethod();
 //            postMethod.setPath(uri.getPath());
             postMethod = new HttpPost(uri);
@@ -177,8 +182,10 @@ public class ArtifactResolutionProfileImpl extends ArtifactResolutionProfileBase
                 log.debug("Using HTTPS configuration");
 
                 CriteriaSet criteriaSet = new CriteriaSet();
-                criteriaSet.add(new EntityIdCriterion(context.getPeerEntityId()));
-                criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
+                criteriaSet.add(new EntityIdCriterion(getPeerEntityId(context)));
+                criteriaSet.add(new ProtocolCriterion(SAMLConstants.SAML20P_NS));
+                criteriaSet.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
+                //criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
                 criteriaSet.add(new UsageCriterion(UsageType.UNSPECIFIED));
 
                 X509TrustManager trustManager = new X509TrustManager(criteriaSet, context.getLocalSSLTrustEngine());

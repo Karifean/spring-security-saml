@@ -39,6 +39,7 @@ import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.util.SAMLUtil;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
 import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
 
 /**
@@ -90,18 +91,18 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
 
             context.setCommunicationProfileId(getProfileIdentifier());
             context.setInboundSAMLBinding(artifactResolutionService.getBinding());
-            context.setOutboundMessage(artifactResolve);
-            context.setOutboundSAMLMessage(artifactResolve);
-            context.setPeerEntityEndpoint(artifactResolutionService);
-            context.setPeerEntityId(idpEntityDescriptor.getEntityID());
-            context.setPeerEntityMetadata(idpEntityDescriptor);
-            context.setPeerEntityRole(idpssoDescriptor.getElementQName());
-            context.setPeerEntityRoleMetadata(idpssoDescriptor);
+            setOutboundMessage(context, artifactResolve);
+            setOutboundSAMLMessage(context, artifactResolve);
+            setPeerEntityEndpoint(context, artifactResolutionService);
+            setPeerEntityId(context, idpEntityDescriptor.getEntityID());
+            setPeerEntityMetadata(context, idpEntityDescriptor);
+            setPeerEntityRole(context, idpssoDescriptor.getElementQName());
+            setPeerEntityRoleMetadata(context, idpssoDescriptor);
             context.setPeerExtendedMetadata(extendedMetadata);
 
             getArtifactResponse(endpointURI, context);
 
-            ArtifactResponse artifactResponse = (ArtifactResponse) context.getInboundSAMLMessage();
+            ArtifactResponse artifactResponse = (ArtifactResponse) getInboundSAMLMessage(context);
 
             if (artifactResponse == null) {
                 throw new MessageDecodingException("Did not receive an artifact response message.");
@@ -166,7 +167,7 @@ public abstract class ArtifactResolutionProfileBase extends AbstractProfileBase 
         ArtifactResolve artifactResolve = artifactResolveBuilder.buildObject();
         artifactResolve.setArtifact(artifact);
 
-        buildCommonAttributes(context.getLocalEntityId(), artifactResolve, endpoint);
+        buildCommonAttributes(getLocalEntityId(context), artifactResolve, endpoint);
 
         return artifactResolve;
 

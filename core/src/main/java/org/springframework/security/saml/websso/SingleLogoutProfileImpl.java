@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 import javax.xml.bind.ValidationException;
 import java.util.List;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
 import static org.springframework.security.saml.util.SAMLUtil.isDateTimeSkewValid;
 
 /**
@@ -64,17 +65,17 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
             return;
         }
 
-        IDPSSODescriptor idpDescriptor = (IDPSSODescriptor) context.getPeerEntityRoleMetadata();
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+        IDPSSODescriptor idpDescriptor = (IDPSSODescriptor) getPeerEntityRoleMetadata(context);
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) getLocalEntityRoleMetadata(context);
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
 
         SingleLogoutService logoutServiceIDP = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
         LogoutRequest logoutRequest = getLogoutRequest(context, credential, logoutServiceIDP);
 
         context.setCommunicationProfileId(getProfileIdentifier());
-        context.setOutboundMessage(logoutRequest);
-        context.setOutboundSAMLMessage(logoutRequest);
-        context.setPeerEntityEndpoint(logoutServiceIDP);
+        setOutboundMessage(context, logoutRequest);
+        setOutboundSAMLMessage(context, logoutRequest);
+        setPeerEntityEndpoint(context, logoutServiceIDP);
 
         boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutRequestSigned();
         sendMessage(context, signMessage);
@@ -100,7 +101,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         SAMLObjectBuilder<LogoutRequest> builder = (SAMLObjectBuilder<LogoutRequest>) builderFactory.getBuilder(LogoutRequest.DEFAULT_ELEMENT_NAME);
         LogoutRequest request = builder.buildObject();
-        buildCommonAttributes(context.getLocalEntityId(), request, bindingService);
+        buildCommonAttributes(getLocalEntityId(context), request, bindingService);
 
         // Add session indexes
         SAMLObjectBuilder<SessionIndex> sessionIndexBuilder = (SAMLObjectBuilder<SessionIndex>) builderFactory.getBuilder(SessionIndex.DEFAULT_ELEMENT_NAME);
@@ -129,7 +130,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
     public boolean processLogoutRequest(SAMLMessageContext context, SAMLCredential credential) throws SAMLException {
 
-        SAMLObject message = context.getInboundSAMLMessage();
+        SAMLObject message = getInboundSAMLMessage(context);
 
         // Verify type
         if (message == null || !(message instanceof LogoutRequest)) {
@@ -139,7 +140,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         LogoutRequest logoutRequest = (LogoutRequest) message;
 
         // Make sure request was authenticated if required, authentication is done as part of the binding processing
-        if (!context.isInboundSAMLMessageAuthenticated() && context.getLocalExtendedMetadata().isRequireLogoutRequestSigned()) {
+        if (!isInboundSAMLMessageAuthenticated(context) && context.getLocalExtendedMetadata().isRequireLogoutRequestSigned()) {
             throw new SAMLStatusException(StatusCode.REQUEST_DENIED, "LogoutRequest is required to be signed by the entity policy");
         }
 
@@ -221,28 +222,28 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         SAMLObjectBuilder<LogoutResponse> responseBuilder = (SAMLObjectBuilder<LogoutResponse>) builderFactory.getBuilder(LogoutResponse.DEFAULT_ELEMENT_NAME);
         LogoutResponse logoutResponse = responseBuilder.buildObject();
 
-        IDPSSODescriptor idpDescriptor = SAMLUtil.getIDPDescriptor(metadata, context.getPeerEntityId());
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+        IDPSSODescriptor idpDescriptor = SAMLUtil.getIDPDescriptor(metadata, getPeerEntityId(context));
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) getLocalEntityRoleMetadata(context);
         String binding = SAMLUtil.getLogoutBinding(idpDescriptor, spDescriptor);
         SingleLogoutService logoutService = SAMLUtil.getLogoutServiceForBinding(idpDescriptor, binding);
 
         logoutResponse.setID(generateID());
-        logoutResponse.setIssuer(getIssuer(context.getLocalEntityId()));
+        logoutResponse.setIssuer(getIssuer(getLocalEntityId(context)));
         logoutResponse.setVersion(SAMLVersion.VERSION_20);
         logoutResponse.setIssueInstant(new DateTime());
-        logoutResponse.setInResponseTo(context.getInboundSAMLMessageId());
+        logoutResponse.setInResponseTo(getInboundSAMLMessageId(context));
         logoutResponse.setDestination(logoutService.getLocation());
 
         Status status = getStatus(statusCode, statusMessage);
         logoutResponse.setStatus(status);
 
         context.setCommunicationProfileId(getProfileIdentifier());
-        context.setOutboundMessage(logoutResponse);
-        context.setOutboundSAMLMessage(logoutResponse);
-        context.setPeerEntityEndpoint(logoutService);
+        setOutboundMessage(context, logoutResponse);
+        setOutboundSAMLMessage(context, logoutResponse);
+        setPeerEntityEndpoint(context, logoutService);
 
-        context.setPeerEntityId(idpDescriptor.getID());
-        context.setPeerEntityRoleMetadata(idpDescriptor);
+        setPeerEntityId(context, idpDescriptor.getID());
+        setPeerEntityRoleMetadata(context, idpDescriptor);
 
         boolean signMessage = context.getPeerExtendedMetadata().isRequireLogoutResponseSigned();
         sendMessage(context, signMessage);
@@ -280,7 +281,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
     public void processLogoutResponse(SAMLMessageContext context) throws SAMLException, org.opensaml.security.SecurityException, ValidationException {
 
-        SAMLObject message = context.getInboundSAMLMessage();
+        SAMLObject message = getInboundSAMLMessage(context);
 
         // Verify type
         if (!(message instanceof LogoutResponse)) {
@@ -289,8 +290,8 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
         LogoutResponse response = (LogoutResponse) message;
 
         // Make sure request was authenticated if required, authentication is done as part of the binding processing
-        if (!context.isInboundSAMLMessageAuthenticated() && context.getLocalExtendedMetadata().isRequireLogoutResponseSigned()) {
-            throw new SAMLException("Logout Response object is required to be signed by the entity policy: " + context.getInboundSAMLMessageId());
+        if (!isInboundSAMLMessageAuthenticated(context) && context.getLocalExtendedMetadata().isRequireLogoutResponseSigned()) {
+            throw new SAMLException("Logout Response object is required to be signed by the entity policy: " + getInboundSAMLMessageId(context));
         }
 
         // Verify issue time
@@ -315,7 +316,7 @@ public class SingleLogoutProfileImpl extends AbstractProfileBase implements Sing
 
         // Verify destination
         if (response.getDestination() != null) {
-            SPSSODescriptor localDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+            SPSSODescriptor localDescriptor = (SPSSODescriptor) getLocalEntityRoleMetadata(context);
 
             // Check if destination is correct on this SP
             List<SingleLogoutService> services = localDescriptor.getSingleLogoutServices();

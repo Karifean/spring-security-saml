@@ -27,6 +27,7 @@ import org.opensaml.saml.saml2.metadata.SingleSignOnService;
 //import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.soap.common.SOAPObjectBuilder;
+import org.opensaml.soap.messaging.context.SOAP11Context;
 import org.opensaml.soap.soap11.Envelope;
 //import org.opensaml.ws.soap.util.SOAPHelper;
 import org.opensaml.ws.transport.http.HTTPOutTransport;
@@ -34,6 +35,10 @@ import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.storage.SAMLMessageStorage;
 
 import java.util.Set;
+
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityId;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityRoleMetadata;
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.setOutboundSAMLMessage;
 
 /**
  * Class implementing the SAML ECP Profile and offers capabilities for SP initialized SSO and
@@ -52,7 +57,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
     public void sendAuthenticationRequest(SAMLMessageContext context, WebSSOProfileOptions options)
             throws SAMLException, ResolverException, MessageEncodingException {
 
-        SPSSODescriptor spDescriptor = (SPSSODescriptor) context.getLocalEntityRoleMetadata();
+        SPSSODescriptor spDescriptor = (SPSSODescriptor) getLocalEntityRoleMetadata(context);
         AssertionConsumerService assertionConsumer = getAssertionConsumerService(options, null, spDescriptor);
 
         // The last parameter refers to the IdP that should receive the message. However,
@@ -60,8 +65,9 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
         AuthnRequest authRequest = getAuthnRequest(context, options, assertionConsumer, null);
 
         context.setCommunicationProfileId(getProfileIdentifier());
-        context.setOutboundMessage(getEnvelope());
-        context.setOutboundSAMLMessage(authRequest);
+        //TODO setOutboundMessage(context, getEnvelope());
+        context.getSubcontext(SOAP11Context.class).setEnvelope(getEnvelope()); //added to replace statement above - make needed adjustments!
+        setOutboundSAMLMessage(context, authRequest);
 
         SOAPHelper.addHeaderBlock(context, getPAOSRequest(assertionConsumer));
         SOAPHelper.addHeaderBlock(context, getECPRequest(context, options));
@@ -112,7 +118,7 @@ public class WebSSOProfileECPImpl extends WebSSOProfileImpl {
 
         ecpRequest.setPassive(options.getPassive());
         ecpRequest.setProviderName(options.getProviderName());
-        ecpRequest.setIssuer(getIssuer(context.getLocalEntityId()));
+        ecpRequest.setIssuer(getIssuer(getLocalEntityId(context)));
 
         Set<String> idpEntityNames = options.getAllowedIDPs();
         if (options.isIncludeScoping() && idpEntityNames != null) {

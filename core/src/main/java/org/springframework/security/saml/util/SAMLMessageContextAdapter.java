@@ -2,10 +2,7 @@ package org.springframework.security.saml.util;
 
 
 import org.opensaml.saml.common.SAMLObject;
-import org.opensaml.saml.common.messaging.context.SAMLEndpointContext;
-import org.opensaml.saml.common.messaging.context.SAMLMetadataContext;
-import org.opensaml.saml.common.messaging.context.SAMLPeerEntityContext;
-import org.opensaml.saml.common.messaging.context.SAMLSelfEntityContext;
+import org.opensaml.saml.common.messaging.context.*;
 import org.opensaml.saml.saml2.core.Response;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.EntityDescriptor;
@@ -19,72 +16,115 @@ import javax.xml.namespace.QName;
  */
 public class SAMLMessageContextAdapter {
 
-    static boolean autoGenerate = true;
+    private static boolean autoGenerate = true;
 
-    static void setInboundSAMLMessage(SAMLMessageContext context, SAMLObject response){
+    public static void setInboundMessage(SAMLMessageContext context, SAMLObject message){
+        context.setMessage(message);
+    }
+
+    public static void setInboundSAMLMessage(SAMLMessageContext context, SAMLObject message){
+        context.setMessage(message);
+    }
+
+    public static void setOutboundMessage(SAMLMessageContext context, SAMLObject message){
+        context.setMessage(message);
+    }
+
+    public static void setOutboundSAMLMessage(SAMLMessageContext context, SAMLObject message){
+        context.setMessage(message);
+    }
+
+    public static SAMLObject getInboundMessage(SAMLMessageContext<? extends SAMLObject> context){
+        return context.getMessage();
+    }
+
+    public static SAMLObject getInboundSAMLMessage(SAMLMessageContext<? extends SAMLObject> context){
+        return context.getMessage();
+    }
+
+    public static SAMLObject getOutboundMessage(SAMLMessageContext<? extends SAMLObject> context){
+        return context.getMessage();
+    }
+
+    public static SAMLObject getOutboundSAMLMessage(SAMLMessageContext<? extends SAMLObject> context){
+        return context.getMessage();
+    }
+
+    public static void setInboundSAMLMessageAuthenticated(SAMLMessageContext context, boolean isAuthenticated){
 
     }
 
-    static void setInboundSAMLMessageAuthenticated(SAMLMessageContext context, boolean isAuthenticated){
-
+    public static Boolean isInboundSAMLMessageAuthenticated(SAMLMessageContext context){
+        return null; //TODO
     }
 
-    /*[WebSSOProfileImpl / SingleLogoutProfileImpl]
-            # context.getLocalEntityId()
-            # context.getLocalEntityRole()
-            (SPSSODescriptor) context.getLocalEntityRoleMetadata()
-            # (IDPSSODescriptor) context.getPeerEntityRoleMetadata()
-*/
-
-    static void setOutboundMessage(SAMLMessageContext context, SAMLObject message){
-
-    }
-    static void setOutboundSAMLMessage(SAMLMessageContext context,SAMLObject message){
-
-    }
-    static void setPeerEntityEndpoint(SAMLMessageContext context, Endpoint endpoint){
+    public static void setPeerEntityEndpoint(SAMLMessageContext context, Endpoint endpoint){
         context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate)
                 .getSubcontext(SAMLEndpointContext.class, autoGenerate).setEndpoint(endpoint);
     }
 
-    static Endpoint getPeerEntityEndpoint(SAMLMessageContext context){
+    public static Endpoint getPeerEntityEndpoint(SAMLMessageContext context){
         return context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate)
                 .getSubcontext(SAMLEndpointContext.class, autoGenerate).getEndpoint();
     }
 
-    static void setPeerEntityId(SAMLMessageContext context, String id){
+    public static void setPeerEntityId(SAMLMessageContext context, String id){
         context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate).setEntityId(id);
     }
 
 
-    static String getPeerEntityId(SAMLMessageContext context){
+    public static String getPeerEntityId(SAMLMessageContext context){
         return context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate).getEntityId();
     }
 
-    static void setPeerEntityMetadata(SAMLMessageContext context, EntityDescriptor metadata){
-
+    public static void setPeerEntityMetadata(SAMLMessageContext context, EntityDescriptor metadata){
+        context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate)
+                .getSubcontext(SAMLMetadataContext.class, autoGenerate).setEntityDescriptor(metadata);
     }
 
-    static void setPeerEntityRole(SAMLMessageContext context, QName role){
+    public static EntityDescriptor getPeerEntityMetadata(SAMLMessageContext context){
+        return context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate)
+                .getSubcontext(SAMLMetadataContext.class, autoGenerate).getEntityDescriptor();
+    }
+
+    public static void setLocalEntityMetadata(SAMLMessageContext context, EntityDescriptor metadata){
+        context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate)
+                .getSubcontext(SAMLMetadataContext.class, autoGenerate).setEntityDescriptor(metadata);
+    }
+
+    public static EntityDescriptor getLocalEntityMetadata(SAMLMessageContext context){
+        return context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate)
+                .getSubcontext(SAMLMetadataContext.class, autoGenerate).getEntityDescriptor();
+    }
+
+    public static void setPeerEntityRole(SAMLMessageContext context, QName role){
         context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate).setRole(role);
     }
 
-    static QName getPeerEntityRole(SAMLMessageContext context){
+    public static QName getPeerEntityRole(SAMLMessageContext context){
         return context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate).getRole();
     }
 
-    static void setPeerEntityRoleMetadata(SAMLMessageContext context, RoleDescriptor role){
-        context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate).getSubcontext(SAMLMetadataContext.class, autoGenerate).setRoleDescriptor(role);
+    public static void setPeerEntityRoleMetadata(SAMLMessageContext context, RoleDescriptor role){
+        context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate)
+                .getSubcontext(SAMLMetadataContext.class, autoGenerate).setRoleDescriptor(role);
     }
 
-    static RoleDescriptor getPeerEntityRoleMetadata(SAMLMessageContext context){
+    public static RoleDescriptor getPeerEntityRoleMetadata(SAMLMessageContext context){
         return context.getSubcontext(SAMLPeerEntityContext.class, autoGenerate).getSubcontext(SAMLMetadataContext.class, autoGenerate).getRoleDescriptor();
+    }
+
+    public static void setLocalEntityRoleMetadata(SAMLMessageContext context, RoleDescriptor role){
+        context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate)
+                .getSubcontext(SAMLMetadataContext.class, autoGenerate).setRoleDescriptor(role);
+    }
+
+    public static RoleDescriptor getLocalEntityRoleMetadata(SAMLMessageContext context){
+        return context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate).getSubcontext(SAMLMetadataContext.class, autoGenerate).getRoleDescriptor();
     }
 
     /*[WebSSOProfileConsumerImpl]
             # context.getInboundSAMLMessage()
-            # context.getPeerEntityId()
-            # context.getPeerEntityMetadata()
             context.isInboundSAMLMessageAuthenticated()
             context.getInboundSAMLMessageId()
 
@@ -103,20 +143,24 @@ public class SAMLMessageContextAdapter {
 
     }*/
 
+    public static String getInboundSAMLMessageId(SAMLMessageContext context) {
+        return context.getSubcontext(SAMLMessageInfoContext.class).getMessageId();
+    }
+
     //[SAMLContextProviderImpl]
-    static void setLocalEntityId(SAMLMessageContext context, String id){
+    public static void setLocalEntityId(SAMLMessageContext context, String id){
         context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate).setEntityId(id);
     }
 
-    static String getLocalEntityId(SAMLMessageContext context){
+    public static String getLocalEntityId(SAMLMessageContext context){
         return context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate).getEntityId();
     }
 
-    static void setLocalEntityRole(SAMLMessageContext context, QName role){
+    public static void setLocalEntityRole(SAMLMessageContext context, QName role){
         context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate).setRole(role);
     }
 
-    static QName getLocalEntityRole(SAMLMessageContext context){
+    public static QName getLocalEntityRole(SAMLMessageContext context){
         return context.getSubcontext(SAMLSelfEntityContext.class, autoGenerate).getRole();
     }
 

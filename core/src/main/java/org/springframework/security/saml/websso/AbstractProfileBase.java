@@ -29,10 +29,13 @@ import org.opensaml.saml.common.binding.artifact.SAMLArtifactMap;
 import net.shibboleth.utilities.java.support.net.BasicURLComparator;
 import net.shibboleth.utilities.java.support.net.URIComparator;
 import org.opensaml.saml.common.xml.SAMLConstants;
+import org.opensaml.saml.criterion.EntityRoleCriterion;
+import org.opensaml.saml.criterion.ProtocolCriterion;
+import org.opensaml.saml.criterion.RoleDescriptorCriterion;
 import org.opensaml.saml.saml2.core.*;
 import org.opensaml.saml.saml2.metadata.Endpoint;
 import org.opensaml.saml.saml2.metadata.IDPSSODescriptor;
-import org.opensaml.security.MetadataCriteria;
+//import org.opensaml.security.MetadataCriteria;
 import org.opensaml.saml.security.impl.SAMLSignatureProfileValidator;
 import org.opensaml.messaging.encoder.MessageEncodingException;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
@@ -54,6 +57,8 @@ import org.springframework.util.Assert;
 
 import javax.xml.bind.ValidationException;
 import java.util.Random;
+
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getPeerEntityMetadata;
 
 /**
  * Base superclass for classes implementing processing of SAML messages.
@@ -231,7 +236,7 @@ public abstract class AbstractProfileBase implements InitializingBean {
             throw new SAMLException("Issuer invalidated by issuer type " + issuer.getFormat());
         }
         // Validate that issuer is expected peer entity
-        if (!context.getPeerEntityMetadata().getEntityID().equals(issuer.getValue())) {
+        if (!getPeerEntityMetadata(context).getEntityID().equals(issuer.getValue())) {
             throw new SAMLException("Issuer invalidated by issuer value " + issuer.getValue());
         }
     }
@@ -268,7 +273,9 @@ public abstract class AbstractProfileBase implements InitializingBean {
         validator.validate(signature);
         CriteriaSet criteriaSet = new CriteriaSet();
         criteriaSet.add(new EntityIdCriterion(IDPEntityID));
-        criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
+        criteriaSet.add(new ProtocolCriterion(SAMLConstants.SAML20P_NS));
+        criteriaSet.add(new EntityRoleCriterion(IDPSSODescriptor.DEFAULT_ELEMENT_NAME));
+        //criteriaSet.add(new MetadataCriteria(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS));
         criteriaSet.add(new UsageCriterion(UsageType.SIGNING));
         log.debug("Verifying signature", signature);
 

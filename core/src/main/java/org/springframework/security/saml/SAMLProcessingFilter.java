@@ -36,6 +36,8 @@ import org.springframework.util.Assert;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static org.springframework.security.saml.util.SAMLMessageContextAdapter.getLocalEntityRoleMetadata;
+
 /**
  * Filter processes arriving SAML messages by delegating to the WebSSOProfile. After the SAMLAuthenticationToken
  * is obtained, authentication providers are asked to authenticate it.
@@ -83,7 +85,7 @@ public class SAMLProcessingFilter extends AbstractAuthenticationProcessingFilter
 
             // Override set values
             context.setCommunicationProfileId(getProfileName());
-            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(context.getLocalEntityRoleMetadata().getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
+            context.setLocalEntityEndpoint(SAMLUtil.getEndpoint(getLocalEntityRoleMetadata(context).getEndpoints(), context.getInboundSAMLBinding(), context.getInboundMessageTransport()));
 
             SAMLAuthenticationToken token = new SAMLAuthenticationToken(context);
             return getAuthenticationManager().authenticate(token);
