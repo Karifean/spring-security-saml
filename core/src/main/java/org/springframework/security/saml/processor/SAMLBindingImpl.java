@@ -14,9 +14,11 @@
  */
 package org.springframework.security.saml.processor;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
-import org.opensaml.ws.security.SecurityPolicyRule;
+import org.opensaml.messaging.handler.MessageHandler;
+import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 import java.util.List;
@@ -37,6 +39,13 @@ public abstract class SAMLBindingImpl implements SAMLBinding {
         this.encoder = encoder;
     }
 
+    protected static HTTPPostEncoder createHTTPPostEncoder(VelocityEngine velocityEngine)
+    {
+        HTTPPostEncoder httpPostEncoder = new HTTPPostEncoder();
+        httpPostEncoder.setVelocityEngine(velocityEngine);
+        return httpPostEncoder;
+    }
+
     public MessageDecoder getMessageDecoder() {
         return decoder;
     }
@@ -45,7 +54,7 @@ public abstract class SAMLBindingImpl implements SAMLBinding {
         return encoder;
     }
 
-    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
+    public void getHandlers(List<MessageHandler> handlers, SAMLMessageContext samlContext) {
     }
 
 }

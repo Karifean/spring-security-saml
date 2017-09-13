@@ -35,16 +35,13 @@ import org.opensaml.saml.saml2.metadata.*;
 //import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.encoder.MessageEncodingException;
-import org.opensaml.ws.transport.InTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-//import org.opensaml.xml.Configuration;
 import org.opensaml.core.xml.XMLObjectBuilder;
 import org.opensaml.core.xml.io.Marshaller;
 import org.opensaml.core.xml.io.MarshallingException;
 import org.opensaml.xml.security.SecurityHelper;
 import org.opensaml.security.credential.Credential;
-//import org.opensaml.signature.*;
-//import org.opensaml.xml.util.DatatypeHelper;
+import org.opensaml.xmlsec.SecurityConfigurationSupport;
+import org.opensaml.xmlsec.keyinfo.KeyInfoSupport;
 import org.opensaml.xmlsec.signature.*;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.Signer;
@@ -235,7 +232,7 @@ public class SAMLUtil {
         try {
 
             MessageDigest sha1Digester = MessageDigest.getInstance("SHA-1");
-            byte[] hashedEntityId = sha1Digester.digest(entityId);
+            byte[] hashedEntityId = sha1Digester.digest(entityId.getBytes());
 
             for (int i = 0; i < hashedEntityId.length; i++) {
                 if (hashedEntityId[i] != hashID[i]) {
@@ -436,8 +433,7 @@ public class SAMLUtil {
 
         if (signingCredential != null && !signableMessage.isSigned()) {
 
-            XMLObjectBuilder<Signature> signatureBuilder = XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(
-                    Signature.DEFAULT_ELEMENT_NAME);
+            XMLObjectBuilder<Signature> signatureBuilder = (XMLObjectBuilder<Signature>) XMLObjectProviderRegistrySupport.getBuilderFactory().getBuilder(Signature.DEFAULT_ELEMENT_NAME);
             Signature signature = signatureBuilder.buildObject(Signature.DEFAULT_ELEMENT_NAME);
 
             if (signingAlgorithm != null) {
@@ -445,9 +441,11 @@ public class SAMLUtil {
             }
 
             signature.setSigningCredential(signingCredential);
+            signature.setHMACOutputLength(SecurityConfigurationSupport.getGlobalSignatureSigningConfiguration().getSignatureHMACOutputLength());
+            signature.setCanonicalizationAlgorithm(SecurityConfigurationSupport.getGlobalSignatureSigningConfiguration().getSignatureCanonicalizationAlgorithm());
 
             try {
-                SecurityHelper.prepareSignatureParams(signature, signingCredential, null, keyInfoGenerator);
+                signature.setKeyInfo(KeyInfoSupport.getKeyInfoGenerator(signingCredential, SecurityConfigurationSupport.getGlobalSignatureSigningConfiguration().getKeyInfoGeneratorManager(), keyInfoGenerator).generate(signingCredential));
             } catch (org.opensaml.security.SecurityException e) {
                 throw new MessageEncodingException("Error preparing signature for signing", e);
             }

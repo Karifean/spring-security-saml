@@ -16,6 +16,8 @@ package org.springframework.security.saml.processor;
 
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.messaging.decoder.MessageDecoder;
+import org.opensaml.messaging.handler.MessageHandler;
+import org.opensaml.saml.common.binding.security.impl.SAMLProtocolMessageXMLSignatureSecurityHandler;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPSOAP11Encoder;
 import org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl;
@@ -69,10 +71,13 @@ public class HTTPSOAP11Binding extends SAMLBindingImpl {
     }
 
     @Override
-    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
+    public void getHandlers(List<MessageHandler> handlers, SAMLMessageContext samlContext) {
 
         SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
-        securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+        //TODO securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+
+        SAMLProtocolMessageXMLSignatureSecurityHandler samlProtocolMessageXMLSignatureSecurityHandler = new SAMLProtocolMessageXMLSignatureSecurityHandler();
+        handlers.add(samlProtocolMessageXMLSignatureSecurityHandler);
 
     }
 

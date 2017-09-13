@@ -19,7 +19,7 @@ import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.metadata.resolver.ChainingMetadataResolver;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.metadata.resolver.filter.MetadataFilter;
-import org.opensaml.saml.metadata.resolver.filter.impl.MetadataFilterChain;
+import org.opensaml.saml.metadata.resolver.filter.MetadataFilterChain;
 import org.opensaml.saml.metadata.resolver.filter.impl.SignatureValidationFilter;
 import org.opensaml.saml.saml2.metadata.*;
 //import org.opensaml.saml2.metadata.provider.*;
@@ -443,7 +443,8 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
 
         for (String key : stringSet) {
 
-            RoleDescriptor idpRoleDescriptor = provider.getRole(key, IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+            EntityDescriptor entityDescriptor = provider.getEntityDescriptor(key);
+            RoleDescriptor idpRoleDescriptor = entityDescriptor.getRoleDescriptors(IDPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS).get(0); //TODO Check
 
             if (idpRoleDescriptor != null) {
                 if (idpName.contains(key)) {
@@ -453,7 +454,7 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
                 }
             }
 
-            RoleDescriptor spRoleDescriptor = provider.getRole(key, SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS);
+            RoleDescriptor spRoleDescriptor = entityDescriptor.getRoleDescriptors(SPSSODescriptor.DEFAULT_ELEMENT_NAME, SAMLConstants.SAML20P_NS).get(0); //TODO Check
             if (spRoleDescriptor != null) {
                 if (spName.contains(key)) {
                     log.warn("Provider {} contains entity {} which was already included in another metadata provider and will be ignored", provider, key);

@@ -15,6 +15,8 @@
 package org.springframework.security.saml.processor;
 
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
+import org.opensaml.messaging.handler.MessageHandler;
+import org.opensaml.messaging.handler.MessageHandlerChain;
 import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.metadata.Endpoint;
@@ -23,6 +25,7 @@ import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.decoder.MessageDecodingException;
 import org.opensaml.messaging.encoder.MessageEncoder;
 import org.opensaml.messaging.encoder.MessageEncodingException;
+import org.opensaml.xmlsec.context.SecurityParametersContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.saml.context.SAMLMessageContext;
@@ -32,8 +35,10 @@ import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static org.springframework.security.saml.util.SAMLMessageContextAdapter.*;
 
@@ -124,7 +129,9 @@ public class SAMLProcessorImpl implements SAMLProcessor {
     protected void populateSecurityPolicy(SAMLMessageContext samlContext, SAMLBinding binding) {
 
         SecurityPolicy policy = new BasicSecurityPolicy();
-        binding.getSecurityPolicy(policy.getPolicyRules(), samlContext);
+        List<MessageHandler> handlers = new ArrayList<MessageHandler>();
+        binding.getHandlers(handlers, samlContext);
+        // TODO Chain
         StaticSecurityPolicyResolver resolver = new StaticSecurityPolicyResolver(policy);
         samlContext.setSecurityPolicyResolver(resolver);
 

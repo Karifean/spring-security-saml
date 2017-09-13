@@ -16,9 +16,12 @@ package org.springframework.security.saml.processor;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
+import org.opensaml.messaging.handler.MessageHandler;
+import org.opensaml.saml.common.binding.security.impl.SAMLProtocolMessageXMLSignatureSecurityHandler;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPPostDecoder;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPPostEncoder;
+import org.opensaml.saml.saml2.binding.security.impl.SAML2HTTPPostSimpleSignSecurityHandler;
 import org.opensaml.saml2.binding.security.SAML2HTTPPostSimpleSignRule;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
@@ -50,15 +53,7 @@ public class HTTPPostBinding extends SAMLBindingImpl {
      * @param velocityEngine engine for message formatting
      */
     public HTTPPostBinding(ParserPool parserPool, VelocityEngine velocityEngine) {
-        this(parserPool, new HTTPPostDecoder(/* parserPool */), createHTTPPostEncoder());   // TODO
-    }
-
-    private HTTPPostEncoder createHTTPPostEncoder(VelocityEngine velocityEngine)
-    {
-        HTTPPostEncoder httpPostEncoder = new HTTPPostEncoder();
-        httpPostEncoder.setVelocityEngine(velocityEngine);
-//        httpPostEncoder.setVelocityTemplateId("/templates/saml2-post-binding.vm");
-        return httpPostEncoder;
+        this(parserPool, new HTTPPostDecoder(/* parserPool */), createHTTPPostEncoder(velocityEngine));
     }
 
     /**
@@ -88,11 +83,17 @@ public class HTTPPostBinding extends SAMLBindingImpl {
     }
 
     @Override
-    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
+    public void getHandlers(List<MessageHandler> handlers, SAMLMessageContext samlContext) {
 
         SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
-        securityPolicy.add(new SAML2HTTPPostSimpleSignRule(engine, parserPool, engine.getKeyInfoResolver()));
-        securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+        //TODO securityPolicy.add(new SAML2HTTPPostSimpleSignRule(engine, parserPool, engine.getKeyInfoResolver()));
+        //TODO securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+        SAML2HTTPPostSimpleSignSecurityHandler saml2HTTPPostSimpleSignSecurityHandler = new SAML2HTTPPostSimpleSignSecurityHandler();
+        saml2HTTPPostSimpleSignSecurityHandler.setParser(parserPool);
+        saml2HTTPPostSimpleSignSecurityHandler.setKeyInfoResolver(engine.getKeyInfoResolver());
+        handlers.add(saml2HTTPPostSimpleSignSecurityHandler);
+        SAMLProtocolMessageXMLSignatureSecurityHandler samlProtocolMessageXMLSignatureSecurityHandler = new SAMLProtocolMessageXMLSignatureSecurityHandler();
+        handlers.add(samlProtocolMessageXMLSignatureSecurityHandler);
 
     }
 

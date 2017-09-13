@@ -15,9 +15,12 @@
 package org.springframework.security.saml.processor;
 
 import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
+import org.opensaml.messaging.handler.MessageHandler;
+import org.opensaml.saml.common.binding.security.impl.SAMLProtocolMessageXMLSignatureSecurityHandler;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.decoding.impl.HTTPRedirectDeflateDecoder;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPRedirectDeflateEncoder;
+import org.opensaml.saml.saml2.binding.security.impl.SAML2HTTPRedirectDeflateSignatureSecurityHandler;
 import org.opensaml.saml2.binding.security.SAML2HTTPRedirectDeflateSignatureRule;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
@@ -71,11 +74,16 @@ public class HTTPRedirectDeflateBinding extends SAMLBindingImpl {
     }
 
     @Override
-    public void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext) {
+    public void getHandlers(List<MessageHandler> handlers, SAMLMessageContext samlContext) {
 
         SignatureTrustEngine engine = samlContext.getLocalTrustEngine();
-        securityPolicy.add(new SAML2HTTPRedirectDeflateSignatureRule(engine));
-        securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+        //TODO securityPolicy.add(new SAML2HTTPRedirectDeflateSignatureRule(engine));
+        //TODO securityPolicy.add(new SAMLProtocolMessageXMLSignatureSecurityPolicyRule(engine));
+
+        SAML2HTTPRedirectDeflateSignatureSecurityHandler saml2HTTPRedirectDeflateSignatureSecurityHandler = new SAML2HTTPRedirectDeflateSignatureSecurityHandler();
+        handlers.add(saml2HTTPRedirectDeflateSignatureSecurityHandler);
+        SAMLProtocolMessageXMLSignatureSecurityHandler samlProtocolMessageXMLSignatureSecurityHandler = new SAMLProtocolMessageXMLSignatureSecurityHandler();
+        handlers.add(samlProtocolMessageXMLSignatureSecurityHandler);
 
     }
 

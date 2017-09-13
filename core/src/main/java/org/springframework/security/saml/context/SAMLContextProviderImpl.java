@@ -25,12 +25,14 @@ import org.opensaml.saml.saml2.metadata.RoleDescriptor;
 import org.opensaml.saml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml.security.impl.MetadataCredentialResolver;
 //import org.opensaml.saml2.metadata.provider.MetadataProviderException;
+import org.opensaml.security.crypto.KeySupport;
 import org.opensaml.security.trust.impl.ExplicitX509CertificateTrustEngine;
 import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
 import org.opensaml.security.x509.impl.PKIXX509CredentialTrustEngine;
 import org.opensaml.security.messaging.ServletRequestX509CredentialAdapter;
 import org.opensaml.xmlsec.SecurityConfigurationSupport;
 import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
+import org.opensaml.xmlsec.encryption.support.EncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
 import org.opensaml.security.credential.Credential;
@@ -79,7 +81,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
     // Way to obtain encrypted key info from XML Encryption
     private static ChainingEncryptedKeyResolver encryptedKeyResolver = new ChainingEncryptedKeyResolver(
-            Arrays.asList(
+            Arrays.<EncryptedKeyResolver>asList(
                     new InlineEncryptedKeyResolver(),
                     new EncryptedElementTypeEncryptedKeyResolver(),
                     new SimpleRetrievalMethodEncryptedKeyResolver())

@@ -16,7 +16,7 @@ package org.springframework.security.saml.processor;
 
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
-import org.opensaml.ws.security.SecurityPolicyRule;
+import org.opensaml.messaging.handler.MessageHandler;
 import org.springframework.security.saml.context.SAMLMessageContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,11 +68,11 @@ public interface SAMLBinding {
     String getBindingURI();
 
     /**
-     * Security rules to apply for incoming SAML messages received using the binding.
+     * Message Handlers to apply for incoming SAML messages received using the binding.
      *
-     * @param securityPolicy storage for created policies
+     * @param handlers list for created handlers
      * @param samlContext processed context
      */
-     void getSecurityPolicy(List<SecurityPolicyRule> securityPolicy, SAMLMessageContext samlContext);
+     void getHandlers(List<MessageHandler> handlers, SAMLMessageContext samlContext);
 
 }
