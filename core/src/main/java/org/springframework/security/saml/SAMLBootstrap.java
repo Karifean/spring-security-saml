@@ -18,6 +18,7 @@ package org.springframework.security.saml;
 import org.opensaml.PaosBootstrap;
 //import org.opensaml.xml.ConfigurationException;
 import org.opensaml.core.config.Configuration;
+import org.opensaml.xmlsec.SecurityConfigurationSupport;
 import org.opensaml.xmlsec.keyinfo.NamedKeyInfoGeneratorManager;
 import org.opensaml.xmlsec.keyinfo.impl.X509KeyInfoGeneratorFactory;
 import org.springframework.beans.BeansException;
@@ -53,7 +54,7 @@ public class SAMLBootstrap implements BeanFactoryPostProcessor {
      * @see SAMLConstants#SAML_METADATA_KEY_INFO_GENERATOR
      */
     protected void setMetadataKeyInfoGenerator() {
-        NamedKeyInfoGeneratorManager manager = Configuration.getGlobalSecurityConfiguration().getKeyInfoGeneratorManager();
+        NamedKeyInfoGeneratorManager manager = SecurityConfigurationSupport.getGlobalEncryptionConfiguration().getDataKeyInfoGeneratorManager();
         X509KeyInfoGeneratorFactory generator = new X509KeyInfoGeneratorFactory();
         generator.setEmitEntityCertificate(true);
         generator.setEmitEntityCertificateChain(true);

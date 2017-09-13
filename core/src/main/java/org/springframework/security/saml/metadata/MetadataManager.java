@@ -27,9 +27,9 @@ import org.opensaml.security.x509.impl.BasicPKIXValidationInformation;
 import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
 import org.opensaml.security.x509.impl.CertPathPKIXValidationOptions;
 import org.opensaml.security.x509.impl.StaticPKIXValidationInformationResolver;
-import org.opensaml.xml.Configuration;
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.security.x509.*;
+import org.opensaml.xmlsec.SecurityConfigurationSupport;
 import org.opensaml.xmlsec.keyinfo.impl.BasicProviderKeyInfoCredentialResolver;
 import org.opensaml.xmlsec.keyinfo.impl.KeyInfoProvider;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
@@ -82,7 +82,7 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
     private Timer timer;
 
     // Internal of metadata refresh checking in ms
-    private long refreshCheckInterval = 10000l;
+    private long refreshCheckInterval = 10000L;
 
     // Flag indicating whether metadata needs to be reloaded
     private boolean refreshRequired = true;
@@ -601,7 +601,7 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
 
             return new PKIXSignatureTrustEngine(
                     getPKIXResolver(provider, trustedKeys, null),
-                    Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(),
+                    SecurityConfigurationSupport.getGlobalDecryptionConfiguration().getDataKeyInfoCredentialResolver(),
                     new org.springframework.security.saml.trust.CertPathPKIXTrustEvaluator(pkixOptions),
                     new BasicX509CredentialNameEvaluator());
 
@@ -609,8 +609,7 @@ public class MetadataManager extends ChainingMetadataResolver implements Extende
 
             log.debug("Trust verification skipped for metadata provider {}", provider);
 
-            return new AllowAllSignatureTrustEngine(new BasicProviderKeyInfoCredentialResolver(new ArrayList<KeyInfoProvider>()));
-            //return new AllowAllSignatureTrustEngine(Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+            return new AllowAllSignatureTrustEngine(SecurityConfigurationSupport.getGlobalDecryptionConfiguration().getDataKeyInfoCredentialResolver());
 
         }
 

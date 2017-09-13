@@ -29,10 +29,7 @@ import org.opensaml.security.trust.impl.ExplicitX509CertificateTrustEngine;
 import org.opensaml.security.x509.impl.BasicX509CredentialNameEvaluator;
 import org.opensaml.security.x509.impl.PKIXX509CredentialTrustEngine;
 import org.opensaml.security.messaging.ServletRequestX509CredentialAdapter;
-import org.opensaml.ws.transport.http.HTTPInTransport;
-import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
-import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
-//import org.opensaml.xml.Configuration;
+import org.opensaml.xmlsec.SecurityConfigurationSupport;
 import org.opensaml.xmlsec.encryption.support.ChainingEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.InlineEncryptedKeyResolver;
 import org.opensaml.xmlsec.encryption.support.SimpleRetrievalMethodEncryptedKeyResolver;
@@ -376,8 +373,7 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         if (chain != null && chain.length > 0) {
 
             logger.debug("Found certificate chain from request {}", chain[0]);
-            BasicX509Credential credential = new BasicX509Credential();
-            credential.setEntityCertificate(chain[0]);
+            BasicX509Credential credential = new BasicX509Credential(chain[0]);
             credential.setEntityCertificateChain(Arrays.asList(chain));
             samlContext.setPeerSSLCredential(credential);
 
@@ -423,9 +419,10 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
     protected void populateTrustEngine(SAMLMessageContext samlContext) {
         SignatureTrustEngine engine;
         if ("pkix".equalsIgnoreCase(samlContext.getLocalExtendedMetadata().getSecurityProfile())) {
-            engine = new PKIXSignatureTrustEngine(pkixResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver(), pkixTrustEvaluator, new BasicX509CredentialNameEvaluator());
+            //TODO Check if another resolver is needed
+            engine = new PKIXSignatureTrustEngine(pkixResolver, SecurityConfigurationSupport.getGlobalDecryptionConfiguration().getDataKeyInfoCredentialResolver(), pkixTrustEvaluator, new BasicX509CredentialNameEvaluator());
         } else {
-            engine = new ExplicitKeySignatureTrustEngine(metadataResolver, Configuration.getGlobalSecurityConfiguration().getDefaultKeyInfoCredentialResolver());
+            engine = new ExplicitKeySignatureTrustEngine(metadataResolver, SecurityConfigurationSupport.getGlobalDecryptionConfiguration().getDataKeyInfoCredentialResolver());
         }
         samlContext.setLocalTrustEngine(engine);
     }
