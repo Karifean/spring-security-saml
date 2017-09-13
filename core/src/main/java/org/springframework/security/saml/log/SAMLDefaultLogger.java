@@ -106,7 +106,7 @@ public class SAMLDefaultLogger implements SAMLLogger {
         if (logMessages) {
             try {
                 if (getInboundSAMLMessage(context) != null) {
-                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(context.getInboundSAMLMessage()));
+                    String messageStr = SerializeSupport.nodeToString(SAMLUtil.marshallMessage(getInboundSAMLMessage(context)));
                     sb.append(messageStr);
                 }
                 if (getOutboundSAMLMessage(context) != null) {

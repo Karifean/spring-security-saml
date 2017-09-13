@@ -14,16 +14,13 @@
  */
 package org.springframework.security.saml.processor;
 
-import org.opensaml.common.binding.security.SAMLProtocolMessageXMLSignatureSecurityPolicyRule;
 import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.handler.MessageHandler;
 import org.opensaml.saml.common.binding.security.impl.SAMLProtocolMessageXMLSignatureSecurityHandler;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.binding.encoding.impl.HTTPSOAP11Encoder;
 import org.opensaml.saml2.binding.decoding.HTTPSOAP11DecoderImpl;
-import org.opensaml.messaging.decoder.MessageDecoder;
 import org.opensaml.messaging.encoder.MessageEncoder;
-import org.opensaml.ws.security.SecurityPolicyRule;
 import net.shibboleth.utilities.java.support.xml.ParserPool;
 import org.opensaml.xmlsec.signature.support.SignatureTrustEngine;
 import org.springframework.security.saml.context.SAMLMessageContext;

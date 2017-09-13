@@ -17,6 +17,7 @@ package org.springframework.security.saml.processor;
 import net.shibboleth.utilities.java.support.resolver.ResolverException;
 import org.opensaml.messaging.handler.MessageHandler;
 import org.opensaml.messaging.handler.MessageHandlerChain;
+import org.opensaml.messaging.handler.impl.BasicMessageHandlerChain;
 import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.saml2.metadata.Endpoint;
@@ -106,7 +107,7 @@ public class SAMLProcessorImpl implements SAMLProcessor {
 
         // Decode the message
         MessageDecoder decoder = binding.getMessageDecoder();
-        decoder.decode(samlContext);
+        decoder.decode();
 
         if (getPeerEntityMetadata(samlContext) == null) {
             throw new MetadataProviderException("Metadata for issuer " + samlContext.getInboundMessageIssuer() + " wasn't found");
@@ -132,6 +133,9 @@ public class SAMLProcessorImpl implements SAMLProcessor {
         List<MessageHandler> handlers = new ArrayList<MessageHandler>();
         binding.getHandlers(handlers, samlContext);
         // TODO Chain
+        BasicMessageHandlerChain chain = new BasicMessageHandlerChain();
+        chain.setHandlers(handlers);
+
         StaticSecurityPolicyResolver resolver = new StaticSecurityPolicyResolver(policy);
         samlContext.setSecurityPolicyResolver(resolver);
 
