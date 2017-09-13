@@ -17,6 +17,7 @@ package org.springframework.security.saml.context;
 
 import org.opensaml.common.binding.BasicSAMLMessageContext;
 import org.opensaml.saml2.encryption.Decrypter;
+import org.opensaml.saml2.encryption.Encrypter;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.trust.TrustEngine;
@@ -35,6 +36,7 @@ import javax.net.ssl.HostnameVerifier;
 public class SAMLMessageContext extends BasicSAMLMessageContext {
 
     private Decrypter localDecrypter;
+    private Encrypter localEncrypter;
     private Credential localSigningCredential;
     private ExtendedMetadata localExtendedMetadata;
     private SignatureTrustEngine localTrustEngine;
@@ -47,6 +49,7 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     private boolean peerUserSelected;
     private String inboundSAMLBinding;
     private SAMLMessageStorage messageStorage;
+
 
     /**
      * Extended metadata of the local entity
@@ -86,6 +89,16 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     public void setLocalDecrypter(Decrypter localDecrypter) {
         this.localDecrypter = localDecrypter;
     }
+
+    public void setLocalEncrypter(Encrypter localEncrypter) {
+        this.localEncrypter = localEncrypter;
+    }
+
+    public Encrypter getLocalEncrypter() {
+        return this.localEncrypter;
+    }
+
+
 
     /**
      * Mechanism able to determine whether incoming message signature should be trusted.
@@ -229,5 +242,7 @@ public class SAMLMessageContext extends BasicSAMLMessageContext {
     public void setMessageStorage(SAMLMessageStorage messageStorage) {
         this.messageStorage = messageStorage;
     }
+
+
 
 }

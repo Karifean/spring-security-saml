@@ -18,6 +18,7 @@ package org.springframework.security.saml.context;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.encryption.Decrypter;
 import org.opensaml.saml2.encryption.EncryptedElementTypeEncryptedKeyResolver;
+import org.opensaml.saml2.encryption.Encrypter;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.IDPSSODescriptor;
 import org.opensaml.saml2.metadata.RoleDescriptor;
@@ -29,9 +30,7 @@ import org.opensaml.ws.transport.http.HTTPInTransport;
 import org.opensaml.ws.transport.http.HttpServletRequestAdapter;
 import org.opensaml.ws.transport.http.HttpServletResponseAdapter;
 import org.opensaml.xml.Configuration;
-import org.opensaml.xml.encryption.ChainingEncryptedKeyResolver;
-import org.opensaml.xml.encryption.InlineEncryptedKeyResolver;
-import org.opensaml.xml.encryption.SimpleRetrievalMethodEncryptedKeyResolver;
+import org.opensaml.xml.encryption.*;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.keyinfo.KeyInfoCredentialResolver;
 import org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver;
@@ -215,6 +214,10 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
 
         populateLocalEntity(context);
         populateDecrypter(context);
+
+        populateEncrypter(context);
+
+
         populateSSLCredential(context);
         populatePeerSSLCredential(context);
         populateTrustEngine(context);
@@ -411,6 +414,38 @@ public class SAMLContextProviderImpl implements SAMLContextProvider, Initializin
         samlContext.setLocalDecrypter(decrypter);
 
     }
+
+    /**
+     * Populates an encrypter based on settings in the extended metadata or using a default credential when no
+     * encryption credential is specified in the extended metadata.
+     *
+     * @param samlContext context to populate decryptor for.
+     */
+    protected void populateEncrypter(SAMLMessageContext samlContext) {
+
+        // Locate encryption key for this entity
+        Credential encryptionCredential;
+        if (samlContext.getLocalExtendedMetadata().getEncryptionKey() != null) {
+            encryptionCredential = keyManager.getCredential(samlContext.getPeerExtendedMetadata().getEncryptionKey());
+        } else {
+            encryptionCredential = keyManager.getDefaultCredential();
+        }
+
+        // Entity used for decrypting of encrypted XML parts
+        // Extracts EncryptedKey from the encrypted XML using the encryptedKeyResolver and attempts to decrypt it
+        // using private keys supplied by the resolver.
+        EncryptionParameters encryptionParameters = new EncryptionParameters();
+        KeyEncryptionParameters keyEncryptionParameters = new KeyEncryptionParameters();
+        keyEncryptionParameters.setEncryptionCredential(encryptionCredential);
+        keyEncryptionParameters.setAlgorithm(Configuration.getGlobalSecurityConfiguration()
+                .getKeyTransportEncryptionAlgorithmURI(encryptionCredential, encryptionParameters.getAlgorithm()));
+        Encrypter encrypter = new Encrypter(encryptionParameters, keyEncryptionParameters);
+
+
+        samlContext.setLocalEncrypter(encrypter);
+
+    }
+
 
     /**
      * Based on the settings in the extended metadata either creates a PKIX trust engine with trusted keys specified
